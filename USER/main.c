@@ -24,15 +24,15 @@ volatile uint8_t Control_lastFlag;
 int main(void)
 {
 	delay_init();
-	DTU_init();															//����ģ���ʼ��
-	motor_init();														//������ƶ�ʱ����ʼ��
+	DTU_init();															//数传模块初始化
+	motor_init();														//电机控制定时器初始化
 //	IMU_init();	
-	while(Receive_complete_flag == 0);									//�ȴ���һ��ָ��������
+	while(Receive_complete_flag == 0);									//等待第一次指令接收完成
 	Command_manage(Receive_length);
 	Receive_complete_flag = 0;
 	
-	TIM_Cmd(TIM2, ENABLE);												//ʹ��TIM2
-	TIM_Cmd(TIM3, ENABLE);												//ʹ��TIM3
+	TIM_Cmd(TIM2, ENABLE);												//使能TIM2
+	TIM_Cmd(TIM3, ENABLE);												//使能TIM3
 	while(1)
 	{
 		if(Receive_complete_flag == 1)
@@ -57,7 +57,7 @@ void TIM4_IRQHandler()
 		else
 		{	
 			Channel_Num = 0;
-			Channel_status = 0;										//Command_status ��= END 
+			Channel_status = 0;										//Command_status ！= END 
 		}
 		Last_count = New_count;
 		Update_Num = 0;
@@ -67,15 +67,15 @@ void TIM4_IRQHandler()
 		Update_Num++;
 		if(Update_Num>1)
 		{
-			if(Channel_Num == 10)									//������9��ͨ����ָ��
+			if(Channel_Num == 10)									//接受完9条通道的指令
 			{
-				Receive_complete_flag = 1;							//ָ�������ɱ�־λ��λ
+				Receive_complete_flag = 1;							//指令接受完成标志位置位
 			}
-			else													//����������μ����������û��һ�εĲ���˵��������ָ��֮�䣬�������ָ����������10˵��ǰ���������ͨ����ָ�����������ʶͨ��ָ����Ժ�������յ���ͨ��ָ��ȫ��������
+			else													//如果连续两次计数器溢出还没有一次的捕获，说明在两条指令之间，但是如果指令数不等于10说明前面的数据有通道的指令被丢弃或者误识通道指令，所以后面程序将收到的通道指令全部丢弃；
 			{
-				memset(&Receive_length, 0, sizeof(Receive_length));	//��Receive_Length��������
+				memset(&Receive_length, 0, sizeof(Receive_length));	//将Receive_Length数组清零
 			}
-			Channel_status = End;									//ָ�������ɱ�־λû����λ���������PWMռ�ձ�
+			Channel_status = End;									//指令接收完成标志位没有置位，不会更新PWM占空比
 		}
 		TIM_ClearFlag(TIM4,TIM_IT_Update);
 	}
