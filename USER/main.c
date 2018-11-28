@@ -7,7 +7,6 @@
 
 
 
-
 volatile uint32_t Last_count = 0;
 volatile uint32_t New_count = 0;
 int32_t Receive_length[10] = {0};
@@ -15,11 +14,8 @@ volatile uint8_t Channel_Num = 0;
 volatile uint8_t Update_Num = 0;
 volatile uint8_t Channel_status = End;
 volatile uint8_t Receive_complete_flag = 0;
-//volatile uint8_t FlyorClimb_Flag = 0;		
-//volatile uint8_t FlyorClimb_lastFlag;
+volatile uint8_t Do_Flag = 0;
 
-volatile uint8_t Control_Flag = 0;		
-volatile uint8_t Control_lastFlag;
 
 int main(void)
 {
@@ -35,12 +31,15 @@ int main(void)
 	TIM_Cmd(TIM3, ENABLE);												//使能TIM3
 	while(1)
 	{
-		if(Receive_complete_flag == 1)
+		if(Do_Flag == 0)
 		{
-			Command_manage(Receive_length);
-			Receive_complete_flag = 0;
+			if(Receive_complete_flag == 1)
+			{
+				Command_manage(Receive_length);
+				Receive_complete_flag = 0;
+			}
+//			IMU();	
 		}
-//		IMU();		
 	};
 }
 
@@ -51,7 +50,7 @@ void TIM4_IRQHandler()
 		New_count = TIM_GetCapture1(TIM4);
 		if( Channel_status != End )
 		{
-			Receive_length[Channel_Num] = New_count + ((uint32_t)Update_Num * 30000) - Last_count;
+			Receive_length[Channel_Num] = New_count + ((uint32_t)Update_Num * TIM4_PERIOD) - Last_count;
 			Channel_Num++;
 		}
 		else
@@ -64,10 +63,11 @@ void TIM4_IRQHandler()
 	}
 	if(TIM_GetITStatus(TIM4,TIM_IT_Update) == 1)
 	{
+		Do_Flag = ~Do_Flag;											//Do_Flag刷新取反
 		Update_Num++;
-		if(Update_Num>1)
+		if( Update_Num > 3 )										//接收到的通道指令最大值为大于16000，小于17000，所以TIM4在通道指令没发完前最多可能溢出3次
 		{
-			if(Channel_Num == 10)									//接受完9条通道的指令
+			if( Channel_Num == 10 )									//接受完9条通道的指令
 			{
 				Receive_complete_flag = 1;							//指令接受完成标志位置位
 			}

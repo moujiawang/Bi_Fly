@@ -12,6 +12,7 @@
 #define PITCH 1
 #define YAW 2
 
+#define TIM4_PERIOD 8000
 
 void DTU_init(void);
 void Command_manage(int32_t Command_length[]);
