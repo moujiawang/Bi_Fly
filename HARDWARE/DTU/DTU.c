@@ -178,7 +178,7 @@ void Command_manage(int32_t Command_length[])
 			case ROLL:
 			{
 			//俯仰--占空比设置
-//						PWM_length = (Command_length[2] / 160) << 1;
+//				PWM_length = (Command_length[2] / 160) << 1;
 				PWM_length = ((Command_length[2] -12000)/75 + 75) << 1;
 				TIM_SetCompare2(TIM2,PWM_length);
 //				PWM_length = 150;
@@ -204,7 +204,7 @@ void Command_manage(int32_t Command_length[])
 //				TIM_SetCompare2(TIM2,PWM_length);
 //				PWM_length = 150;
 //				TIM_SetCompare3(TIM2,PWM_length);
-				PWM_length = (((Command_length[2] -12000) >> 8) +75)<< 1;					
+				PWM_length = (((Command_length[2] - 12000) >> 8) +72)<< 1;					
 				TIM_SetCompare4(TIM2,PWM_length);
 			};break;
 			default:;break;

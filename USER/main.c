@@ -14,7 +14,7 @@ volatile uint8_t Channel_Num = 0;
 volatile uint8_t Update_Num = 0;
 volatile uint8_t Channel_status = End;
 volatile uint8_t Receive_complete_flag = 0;
-volatile uint8_t Do_Flag = 0;
+volatile uint8_t Do_Flag = 0;											//while loop time control flag，when Do_flag = 0，while loop can execute
 
 
 int main(void)
@@ -35,9 +35,10 @@ int main(void)
 		{
 			if(Receive_complete_flag == 1)
 			{
-				Command_manage(Receive_length);
+				Command_manage(Receive_length);							
 				Receive_complete_flag = 0;
 			}
+			Do_Flag = ~0;											
 //			IMU();	
 		}
 	};
@@ -68,7 +69,6 @@ void TIM4_IRQHandler()
 		if( Update_Num > 3 )										//接收到的通道指令最大值为大于16000，小于17000，所以TIM4在通道指令没发完前最多可能溢出3次
 		{
 			if( Channel_Num == 10 )									//接受完9条通道的指令
-
 			{
 				Receive_complete_flag = 1;							//指令接受完成标志位置位
 			}
