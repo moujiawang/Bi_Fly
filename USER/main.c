@@ -63,15 +63,12 @@ void TIM4_IRQHandler()
 	}
 	if(TIM_GetITStatus(TIM4,TIM_IT_Update) == 1)
 	{
-		Do_Flag = ~Do_Flag;											//Do_Flagˢ��ȡ��
+		Do_Flag = ~Do_Flag;											//Do_Flag刷新取反
 		Update_Num++;
-		if( Update_Num > 3 )										//���յ���ͨ��ָ�����ֵΪ����16000��С��17000������TIM4��ͨ��ָ��û����ǰ���������3��
+		if( Update_Num > 3 )										//接收到的通道指令最大值为大于16000，小于17000，所以TIM4在通道指令没发完前最多可能溢出3次
 		{
-<<<<<<< HEAD
-			if( Channel_Num == 10 )									//������9��ͨ����ָ��
-=======
-			if(Channel_Num == 10)									//接受完9条通道的指令
->>>>>>> db414441306347f43fc09a3cba97d0405cbc05f2
+			if( Channel_Num == 10 )									//接受完9条通道的指令
+
 			{
 				Receive_complete_flag = 1;							//指令接受完成标志位置位
 			}

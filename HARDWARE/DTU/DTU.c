@@ -27,13 +27,9 @@ void DTU_init(void)
 //数传模块接收机油门摇杆推满100，对应脉宽是0.586ms，推到负满量程-100，对应脉宽是1.414ms
 	TIM_TimeBaseInitStruct.TIM_Prescaler = (9-1);				//72MHZ/9等于定时器计数器1秒钟计数的次数，也就是8MHZ，那每计数一次时间为0.000125ms
 	TIM_TimeBaseInitStruct.TIM_CounterMode = TIM_CounterMode_Up;
-<<<<<<< HEAD
-	TIM_TimeBaseInitStruct.TIM_Period = TIM4_PERIOD;			//����10000��,��Ӧʱ����3.75ms
-	TIM_TimeBaseInitStruct.TIM_ClockDivision = TIM_CKD_DIV1; 	//����ʱ�ӷָ�:TDTS = Tck_tim
-=======
-	TIM_TimeBaseInitStruct.TIM_Period = 30000;					//计数30000次,对应时间是3.75ms
-	TIM_TimeBaseInitStruct.TIM_ClockDivision = TIM_CKD_DIV1; 	//设置时钟分割:TDTS = Tck_tim
->>>>>>> db414441306347f43fc09a3cba97d0405cbc05f2
+	TIM_TimeBaseInitStruct.TIM_Period = TIM4_PERIOD;			//计数10000次,对应时间是1ms
+	TIM_TimeBaseInitStruct.TIM_ClockDivision = TIM_CKD_DIV1; 	///设置时钟分割:TDTS = Tck_tim
+
 
 	TIM_TimeBaseInit(TIM4, &TIM_TimeBaseInitStruct);
 
