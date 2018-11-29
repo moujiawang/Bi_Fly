@@ -12,43 +12,48 @@ void DTU_init(void)
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
 	NVIC_InitTypeDef NVIC_InitStruct;
 	
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);		//´ò¿ªÍ¨ÓÃ¶¨Ê±Æ÷4µÄÊ±ÖÓ 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_AFIO, ENABLE);			//´ò¿ªPBÒı½ÅµÄÊ±ÖÓ
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);		//æ‰“å¼€é€šç”¨å®šæ—¶å™¨4çš„æ—¶é’Ÿ 
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_AFIO, ENABLE);			//æ‰“å¼€PBå¼•è„šçš„æ—¶é’Ÿ
 	
 	GPIO_def.GPIO_Pin = GPIO_Pin_6;
 	GPIO_def.GPIO_Mode = GPIO_Mode_IPD;						// 
-//	GPIO_def.GPIO_OType = GPIO_OType_PP;						//ÍÆÃâÊä³ö
+//	GPIO_def.GPIO_OType = GPIO_OType_PP;						//æ¨å…è¾“å‡º
 	GPIO_def.GPIO_Speed = GPIO_Speed_50MHz;
 	
 	GPIO_Init(GPIOB,&GPIO_def);
 	
 //	GPIO_PinAFConfig(GPIOB,GPIO_PinSource6,GPIO_AF_TIM4);
 
-//Êı´«Ä£¿é½ÓÊÕ»úÓÍÃÅÒ¡¸ËÍÆÂú100£¬¶ÔÓ¦Âö¿íÊÇ0.586ms£¬ÍÆµ½¸ºÂúÁ¿³Ì-100£¬¶ÔÓ¦Âö¿íÊÇ1.414ms
-	TIM_TimeBaseInitStruct.TIM_Prescaler = (9-1);				//72MHZ/9µÈÓÚ¶¨Ê±Æ÷¼ÆÊıÆ÷1ÃëÖÓ¼ÆÊıµÄ´ÎÊı£¬Ò²¾ÍÊÇ8MHZ£¬ÄÇÃ¿¼ÆÊıÒ»´ÎÊ±¼äÎª0.000125ms
+//æ•°ä¼ æ¨¡å—æ¥æ”¶æœºæ²¹é—¨æ‘‡æ†æ¨æ»¡100ï¼Œå¯¹åº”è„‰å®½æ˜¯0.586msï¼Œæ¨åˆ°è´Ÿæ»¡é‡ç¨‹-100ï¼Œå¯¹åº”è„‰å®½æ˜¯1.414ms
+	TIM_TimeBaseInitStruct.TIM_Prescaler = (9-1);				//72MHZ/9ç­‰äºå®šæ—¶å™¨è®¡æ•°å™¨1ç§’é’Ÿè®¡æ•°çš„æ¬¡æ•°ï¼Œä¹Ÿå°±æ˜¯8MHZï¼Œé‚£æ¯è®¡æ•°ä¸€æ¬¡æ—¶é—´ä¸º0.000125ms
 	TIM_TimeBaseInitStruct.TIM_CounterMode = TIM_CounterMode_Up;
+<<<<<<< HEAD
 	TIM_TimeBaseInitStruct.TIM_Period = TIM4_PERIOD;			//¼ÆÊı10000´Î,¶ÔÓ¦Ê±¼äÊÇ3.75ms
 	TIM_TimeBaseInitStruct.TIM_ClockDivision = TIM_CKD_DIV1; 	//ÉèÖÃÊ±ÖÓ·Ö¸î:TDTS = Tck_tim
+=======
+	TIM_TimeBaseInitStruct.TIM_Period = 30000;					//è®¡æ•°30000æ¬¡,å¯¹åº”æ—¶é—´æ˜¯3.75ms
+	TIM_TimeBaseInitStruct.TIM_ClockDivision = TIM_CKD_DIV1; 	//è®¾ç½®æ—¶é’Ÿåˆ†å‰²:TDTS = Tck_tim
+>>>>>>> db414441306347f43fc09a3cba97d0405cbc05f2
 
 	TIM_TimeBaseInit(TIM4, &TIM_TimeBaseInitStruct);
 
-	TIM_ICInitStruct.TIM_Channel = TIM_Channel_1;				//ÉèÖÃÎªÍ¨µÀ1
-	TIM_ICInitStruct.TIM_ICPolarity = TIM_ICPolarity_Falling;	//ÉèÖÃÎªÏÂ½µÑØ¼ì²â
+	TIM_ICInitStruct.TIM_Channel = TIM_Channel_1;				//è®¾ç½®ä¸ºé€šé“1
+	TIM_ICInitStruct.TIM_ICPolarity = TIM_ICPolarity_Falling;	//è®¾ç½®ä¸ºä¸‹é™æ²¿æ£€æµ‹
 	TIM_ICInitStruct.TIM_ICSelection = TIM_ICSelection_DirectTI;//TIM Input 1, 2, 3 or 4 is selected to be connected to IC1, IC2, IC3 or IC4, respectively
 	TIM_ICInitStruct.TIM_ICPrescaler = TIM_ICPSC_DIV1;			//Capture performed each time an edge is detected on the capture input
 	TIM_ICInitStruct.TIM_ICFilter = 3<<4;						//Fsampling = Fck_int, N=8;
 	
 	TIM_ICInit(TIM4, &TIM_ICInitStruct);		
 
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);				//ÖĞ¶Ï·Ö×é		
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);				//ä¸­æ–­åˆ†ç»„		
 	
-	NVIC_InitStruct.NVIC_IRQChannel = TIM4_IRQn;				//ÉèÖÃ³õÊ¼»¯µÄÊÇTIM4µÄÖĞ¶Ï	
-	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 2;		//ÉèÖÃÇÀÕ¼ÓÅÏÈ¼¶Îª2
-	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;				//ÉèÖÃÏìÓ¦ÓÅÏÈ¼¶£¨×ÓÓÅÏÈ¼¶£©Îª0
-	NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;				//Ê¹ÄÜ¶¨Ê±Æ÷4Õâ¸öÖĞ¶Ï
+	NVIC_InitStruct.NVIC_IRQChannel = TIM4_IRQn;				//è®¾ç½®åˆå§‹åŒ–çš„æ˜¯TIM4çš„ä¸­æ–­	
+	NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 2;		//è®¾ç½®æŠ¢å ä¼˜å…ˆçº§ä¸º2
+	NVIC_InitStruct.NVIC_IRQChannelSubPriority = 0;				//è®¾ç½®å“åº”ä¼˜å…ˆçº§ï¼ˆå­ä¼˜å…ˆçº§ï¼‰ä¸º0
+	NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;				//ä½¿èƒ½å®šæ—¶å™¨4è¿™ä¸ªä¸­æ–­
 	NVIC_Init(&NVIC_InitStruct);
 	
-	TIM_ITConfig(TIM4,TIM_IT_CC1,ENABLE);						//Ê¹ÄÜTIM4µÄIC1Í¨µÀÖĞ¶Ï
+	TIM_ITConfig(TIM4,TIM_IT_CC1,ENABLE);						//ä½¿èƒ½TIM4çš„IC1é€šé“ä¸­æ–­
 	TIM_ITConfig(TIM4,TIM_IT_Update,ENABLE);
 
 	TIM_Cmd(TIM4, ENABLE);
@@ -62,7 +67,7 @@ void Command_manage(int32_t Command_length[])
 	uint8_t FlyorClimb_Flag = 0;
 	int32_t PWM_length = 0;
 
-//ÅĞ¶Ïµ±Ç°ÄÄ¸ö¶æ»úÊÜ¿Ø
+//åˆ¤æ–­å½“å‰å“ªä¸ªèˆµæœºå—æ§
 	if((Command_length[4]-4000) <= 7000)
 		Control_Flag = PITCH;
 	else 
@@ -71,7 +76,7 @@ void Command_manage(int32_t Command_length[])
 		else 
 			Control_Flag = YAW;
 
-//ÅĞ¶Ïµ±Ç°·ÉÅÀÖ¸Áî
+//åˆ¤æ–­å½“å‰é£çˆ¬æŒ‡ä»¤
 	if((7800 < (Command_length[6]-4000)) && ((Command_length[6]-4000) < 8200))
 		FlyorClimb_Flag = STOP;
 	else 
@@ -79,8 +84,8 @@ void Command_manage(int32_t Command_length[])
 			FlyorClimb_Flag = FLY;
 		else 
 			FlyorClimb_Flag = CLIMB;
-//¶Ô·É»òÅÀµÄÖ¸Áî½øĞĞ´¦Àí
-/*	if(FlyorClimb_Flag == FlyorClimb_lastFlag)					//·ÉÅÀ×´Ì¬Ã»ÓĞ±ä»¯£¬Ö»ĞèÒªË¢ĞÂPWM²¨µÄÕ¼¿Õ±È¾ÍĞĞ
+//å¯¹é£æˆ–çˆ¬çš„æŒ‡ä»¤è¿›è¡Œå¤„ç†
+/*	if(FlyorClimb_Flag == FlyorClimb_lastFlag)					//é£çˆ¬çŠ¶æ€æ²¡æœ‰å˜åŒ–ï¼Œåªéœ€è¦åˆ·æ–°PWMæ³¢çš„å ç©ºæ¯”å°±è¡Œ
 	{
 		switch(FlyorClimb_Flag)
 		{
@@ -97,16 +102,16 @@ void Command_manage(int32_t Command_length[])
 			default:;
 		}
 	}
-	else														//·ÉÅÀ×´Ì¬±ä»¯£¬ĞèÒª£¨1£©Í£Ö¹µ±Ç°PWMÊä³ö¿ÚµÄÊä³ö;(2)ÖØĞÂÅäÖÃÊä³ö¶Ë¿Ú;(3)Ë¢ĞÂPWM²¨µÄÕ¼¿Õ±È;
+	else														//é£çˆ¬çŠ¶æ€å˜åŒ–ï¼Œéœ€è¦ï¼ˆ1ï¼‰åœæ­¢å½“å‰PWMè¾“å‡ºå£çš„è¾“å‡º;(2)é‡æ–°é…ç½®è¾“å‡ºç«¯å£;(3)åˆ·æ–°PWMæ³¢çš„å ç©ºæ¯”;
 	{*/
 		switch(FlyorClimb_Flag)
 		{
 			case FLY:
 			{
-			//ÅÀĞĞ»ú¹¹µç»ú¿ØÖÆ--Í£Ö¹ÅÀĞĞ
+			//çˆ¬è¡Œæœºæ„ç”µæœºæ§åˆ¶--åœæ­¢çˆ¬è¡Œ
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Disable;
 				TIM_OC2Init(TIM3, &TIM_OCInitStruct);
-			//ÅÄ´ò»ú¹¹µç»ú¿ØÖÆ--Ê¹ÄÜ£¬Õ¼¿Õ±ÈÉèÖÃ
+			//æ‹æ‰“æœºæ„ç”µæœºæ§åˆ¶--ä½¿èƒ½ï¼Œå ç©ºæ¯”è®¾ç½®
 				TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Enable;
 				TIM_OCInitStruct.TIM_Pulse = ((abs(Command_length[1] - 12000)) >> 7)*80;
@@ -117,11 +122,11 @@ void Command_manage(int32_t Command_length[])
 			};break;
 			case CLIMB:
 			{
-			//ÅÀĞĞ»ú¹¹µç»ú¿ØÖÆ--Í£Ö¹ÅÀĞĞ
+			//çˆ¬è¡Œæœºæ„ç”µæœºæ§åˆ¶--åœæ­¢çˆ¬è¡Œ
 				TIM_OCInitStruct.TIM_OutputState = TIM_OutputState_Disable;
 				TIM_OC1Init(TIM3, &TIM_OCInitStruct);
 //						GPIO_ResetBits(GPIOA,GPIO_Pin_6);
-			//ÅÄ´ò»ú¹¹µç»ú¿ØÖÆ--Ê¹ÄÜ£¬Õ¼¿Õ±ÈÉèÖÃ
+			//æ‹æ‰“æœºæ„ç”µæœºæ§åˆ¶--ä½¿èƒ½ï¼Œå ç©ºæ¯”è®¾ç½®
 				TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Enable;
 				TIM_OCInitStruct.TIM_Pulse = ((abs(Command_length[1] - 12000)) >> 7)*80;
@@ -131,52 +136,52 @@ void Command_manage(int32_t Command_length[])
 			};break;
 			default:
 			{
-			//ÅÀĞĞ»ú¹¹µç»ú¿ØÖÆ--Í£Ö¹ÅÀĞĞ
+			//çˆ¬è¡Œæœºæ„ç”µæœºæ§åˆ¶--åœæ­¢çˆ¬è¡Œ
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Disable;
 				TIM_OC1Init(TIM3, &TIM_OCInitStruct);
 //						GPIO_ResetBits(GPIOA,GPIO_Pin_6);
-			//ÅÀĞĞ»ú¹¹µç»ú¿ØÖÆ--Í£Ö¹ÅÀĞĞ
+			//çˆ¬è¡Œæœºæ„ç”µæœºæ§åˆ¶--åœæ­¢çˆ¬è¡Œ
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Disable;
 				TIM_OC2Init(TIM3, &TIM_OCInitStruct);
 			};break;
 		}
-//		FlyorClimb_lastFlag = FlyorClimb_Flag;					//¼ÇÂ¼µ±Ç°·ÉÅÀ×´Ì¬
+//		FlyorClimb_lastFlag = FlyorClimb_Flag;					//è®°å½•å½“å‰é£çˆ¬çŠ¶æ€
 //	}
-	//¶Ô¶æ»ú¿ØÖÆ×´Ì¬µÄÖ¸Áî½øĞĞ´¦Àí
-/*	if(Control_Flag == Control_lastFlag)						//¶æ»ú¿ØÖÆ×´Ì¬Ã»ÓĞ±ä»¯£¬Ö»ĞèÒªË¢ĞÂPWM²¨µÄÕ¼¿Õ±È¾ÍĞĞ
+	//å¯¹èˆµæœºæ§åˆ¶çŠ¶æ€çš„æŒ‡ä»¤è¿›è¡Œå¤„ç†
+/*	if(Control_Flag == Control_lastFlag)						//èˆµæœºæ§åˆ¶çŠ¶æ€æ²¡æœ‰å˜åŒ–ï¼Œåªéœ€è¦åˆ·æ–°PWMæ³¢çš„å ç©ºæ¯”å°±è¡Œ
 	{
 		switch(Control_Flag)
 		{
 			case ROLL:
 			{
-			//¸©Ñö--Õ¼¿Õ±ÈÉèÖÃ
+			//ä¿¯ä»°--å ç©ºæ¯”è®¾ç½®
 //				PWM_length = (Command_length[2] / 160) << 1;
 				PWM_length = ((Command_length[2] -12000)/75 + 75) << 1;
 				TIM_SetCompare2(TIM2,PWM_length);				
 			};break;
 			case PITCH:
 			{
-			//·­¹ö--Õ¼¿Õ±ÈÉèÖÃ
+			//ç¿»æ»š--å ç©ºæ¯”è®¾ç½®
 //				PWM_length = (Command_length[2] / 160) << 1;
 				PWM_length = ((Command_length[2] -12000)/75 + 75) << 1;
 				TIM_SetCompare3(TIM2,PWM_length);	
 			};break;
 			case YAW:
 			{
-			//Æ«º½--Õ¼¿Õ±ÈÉèÖÃ
+			//åèˆª--å ç©ºæ¯”è®¾ç½®
 				PWM_length = (((Command_length[2] -12000) >> 8) +75)<< 1;
 				TIM_SetCompare4(TIM2,PWM_length);	
 			};break;
 			default:;break;
 		}
 	}
-	else														//¶æ»ú¿ØÖÆ×´Ì¬¸Ä±ä£¬ĞèÒª£¨1£©Î´Ñ¡ÔñµÄ¶æ»ú·µ»ØÆğµãÎ»ÖÃ;(2)Ë¢ĞÂPWM²¨µÄÕ¼¿Õ±È;
+	else														//èˆµæœºæ§åˆ¶çŠ¶æ€æ”¹å˜ï¼Œéœ€è¦ï¼ˆ1ï¼‰æœªé€‰æ‹©çš„èˆµæœºè¿”å›èµ·ç‚¹ä½ç½®;(2)åˆ·æ–°PWMæ³¢çš„å ç©ºæ¯”;
 	{*/
 		switch(Control_Flag)
 		{
 			case ROLL:
 			{
-			//¸©Ñö--Õ¼¿Õ±ÈÉèÖÃ
+			//ä¿¯ä»°--å ç©ºæ¯”è®¾ç½®
 //						PWM_length = (Command_length[2] / 160) << 1;
 				PWM_length = ((Command_length[2] -12000)/75 + 75) << 1;
 				TIM_SetCompare2(TIM2,PWM_length);
@@ -187,7 +192,7 @@ void Command_manage(int32_t Command_length[])
 			};break;
 			case PITCH:
 			{
-			//·­¹ö--Õ¼¿Õ±ÈÉèÖÃ
+			//ç¿»æ»š--å ç©ºæ¯”è®¾ç½®
 //				PWM_length = 150;
 //				TIM_SetCompare2(TIM2,PWM_length);
 //				PWM_length = (Command_length[2] / 160) << 1;
@@ -198,7 +203,7 @@ void Command_manage(int32_t Command_length[])
 			};break;
 			case YAW:
 			{
-			//Æ«º½--Õ¼¿Õ±ÈÉèÖÃ
+			//åèˆª--å ç©ºæ¯”è®¾ç½®
 //				PWM_length = 150;
 //				TIM_SetCompare2(TIM2,PWM_length);
 //				PWM_length = 150;
@@ -208,6 +213,6 @@ void Command_manage(int32_t Command_length[])
 			};break;
 			default:;break;
 		}
-//		Control_lastFlag = Control_Flag;						//¼ÇÂ¼µ±Ç°·ÉÅÀ×´Ì¬
+//		Control_lastFlag = Control_Flag;						//è®°å½•å½“å‰é£çˆ¬çŠ¶æ€
 //	}
 }
