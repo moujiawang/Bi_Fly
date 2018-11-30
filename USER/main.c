@@ -20,8 +20,6 @@ volatile uint8_t Do_Flag = 0;											//while loop time control flag，when Do
 int main(void)
 {
 	delay_init();
-	//test conflict
-	//asdfasdfasdflkjasl;kdf
 	DTU_init();															//数传模块初始化
 	motor_init();														//电机控制定时器初始化
 //	IMU_init();	
