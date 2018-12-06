@@ -15,7 +15,7 @@ void DTU_init(void)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);		//打开通用定时器4的时钟 
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_AFIO, ENABLE);			//打开PB引脚的时钟
 	
-	GPIO_def.GPIO_Pin = GPIO_Pin_6;
+	GPIO_def.GPIO_Pin = GPIO_Pin_7;
 	GPIO_def.GPIO_Mode = GPIO_Mode_IPD;						// 
 //	GPIO_def.GPIO_OType = GPIO_OType_PP;						//推免输出
 	GPIO_def.GPIO_Speed = GPIO_Speed_50MHz;
@@ -33,7 +33,7 @@ void DTU_init(void)
 
 	TIM_TimeBaseInit(TIM4, &TIM_TimeBaseInitStruct);
 
-	TIM_ICInitStruct.TIM_Channel = TIM_Channel_1;				//设置为通道1
+	TIM_ICInitStruct.TIM_Channel = TIM_Channel_2;				//设置为通道2
 	TIM_ICInitStruct.TIM_ICPolarity = TIM_ICPolarity_Falling;	//设置为下降沿检测
 	TIM_ICInitStruct.TIM_ICSelection = TIM_ICSelection_DirectTI;//TIM Input 1, 2, 3 or 4 is selected to be connected to IC1, IC2, IC3 or IC4, respectively
 	TIM_ICInitStruct.TIM_ICPrescaler = TIM_ICPSC_DIV1;			//Capture performed each time an edge is detected on the capture input
@@ -49,7 +49,7 @@ void DTU_init(void)
 	NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;				//使能定时器4这个中断
 	NVIC_Init(&NVIC_InitStruct);
 	
-	TIM_ITConfig(TIM4,TIM_IT_CC1,ENABLE);						//使能TIM4的IC1通道中断
+	TIM_ITConfig(TIM4,TIM_IT_CC2,ENABLE);						//使能TIM4的IC2通道中断
 	TIM_ITConfig(TIM4,TIM_IT_Update,ENABLE);
 
 	TIM_Cmd(TIM4, ENABLE);

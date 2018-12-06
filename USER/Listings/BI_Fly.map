@@ -5,7 +5,7 @@ Component: ARM Compiler 5.05 update 1 (build 106) Tool: armlink [4d0efa]
 Section Cross References
 
     main.o(i.TIM4_IRQHandler) refers to stm32f10x_tim.o(i.TIM_GetITStatus) for TIM_GetITStatus
-    main.o(i.TIM4_IRQHandler) refers to stm32f10x_tim.o(i.TIM_GetCapture1) for TIM_GetCapture1
+    main.o(i.TIM4_IRQHandler) refers to stm32f10x_tim.o(i.TIM_GetCapture2) for TIM_GetCapture2
     main.o(i.TIM4_IRQHandler) refers to rt_memclr_w.o(.text) for __aeabi_memclr4
     main.o(i.TIM4_IRQHandler) refers to stm32f10x_tim.o(i.TIM_ClearFlag) for TIM_ClearFlag
     main.o(i.TIM4_IRQHandler) refers to main.o(.data) for New_count
@@ -613,7 +613,7 @@ Removing Unused input sections from the image.
     Removing stm32f10x_tim.o(i.TIM_ForcedOC3Config), (18 bytes).
     Removing stm32f10x_tim.o(i.TIM_ForcedOC4Config), (26 bytes).
     Removing stm32f10x_tim.o(i.TIM_GenerateEvent), (4 bytes).
-    Removing stm32f10x_tim.o(i.TIM_GetCapture2), (6 bytes).
+    Removing stm32f10x_tim.o(i.TIM_GetCapture1), (6 bytes).
     Removing stm32f10x_tim.o(i.TIM_GetCapture3), (6 bytes).
     Removing stm32f10x_tim.o(i.TIM_GetCapture4), (8 bytes).
     Removing stm32f10x_tim.o(i.TIM_GetCounter), (6 bytes).
@@ -879,7 +879,7 @@ Image Symbol Table
     i.TIM4_IRQHandler                        0x08000a8c   Section        0  main.o(i.TIM4_IRQHandler)
     i.TIM_ClearFlag                          0x08000b68   Section        0  stm32f10x_tim.o(i.TIM_ClearFlag)
     i.TIM_Cmd                                0x08000b6e   Section        0  stm32f10x_tim.o(i.TIM_Cmd)
-    i.TIM_GetCapture1                        0x08000b86   Section        0  stm32f10x_tim.o(i.TIM_GetCapture1)
+    i.TIM_GetCapture2                        0x08000b86   Section        0  stm32f10x_tim.o(i.TIM_GetCapture2)
     i.TIM_GetITStatus                        0x08000b8c   Section        0  stm32f10x_tim.o(i.TIM_GetITStatus)
     i.TIM_ICInit                             0x08000bb0   Section        0  stm32f10x_tim.o(i.TIM_ICInit)
     i.TIM_ITConfig                           0x08000c5c   Section        0  stm32f10x_tim.o(i.TIM_ITConfig)
@@ -1084,7 +1084,7 @@ Image Symbol Table
     TIM4_IRQHandler                          0x08000a8d   Thumb Code   184  main.o(i.TIM4_IRQHandler)
     TIM_ClearFlag                            0x08000b69   Thumb Code     6  stm32f10x_tim.o(i.TIM_ClearFlag)
     TIM_Cmd                                  0x08000b6f   Thumb Code    24  stm32f10x_tim.o(i.TIM_Cmd)
-    TIM_GetCapture1                          0x08000b87   Thumb Code     6  stm32f10x_tim.o(i.TIM_GetCapture1)
+    TIM_GetCapture2                          0x08000b87   Thumb Code     6  stm32f10x_tim.o(i.TIM_GetCapture2)
     TIM_GetITStatus                          0x08000b8d   Thumb Code    34  stm32f10x_tim.o(i.TIM_GetITStatus)
     TIM_ICInit                               0x08000bb1   Thumb Code   150  stm32f10x_tim.o(i.TIM_ICInit)
     TIM_ITConfig                             0x08000c5d   Thumb Code    18  stm32f10x_tim.o(i.TIM_ITConfig)
@@ -1230,7 +1230,7 @@ Memory Map of the image
     0x08000a8c   0x000000dc   Code   RO            1    i.TIM4_IRQHandler   main.o
     0x08000b68   0x00000006   Code   RO         2465    i.TIM_ClearFlag     stm32f10x_tim.o
     0x08000b6e   0x00000018   Code   RO         2471    i.TIM_Cmd           stm32f10x_tim.o
-    0x08000b86   0x00000006   Code   RO         2486    i.TIM_GetCapture1   stm32f10x_tim.o
+    0x08000b86   0x00000006   Code   RO         2487    i.TIM_GetCapture2   stm32f10x_tim.o
     0x08000b8c   0x00000022   Code   RO         2492    i.TIM_GetITStatus   stm32f10x_tim.o
     0x08000bae   0x00000002   PAD
     0x08000bb0   0x000000ac   Code   RO         2494    i.TIM_ICInit        stm32f10x_tim.o

@@ -46,9 +46,9 @@ int main(void)
 
 void TIM4_IRQHandler()
 {
-	if(TIM_GetITStatus(TIM4,TIM_IT_CC1) == 1)
+	if(TIM_GetITStatus(TIM4,TIM_IT_CC2) == 1)
 	{
-		New_count = TIM_GetCapture1(TIM4);
+		New_count = TIM_GetCapture2(TIM4);
 		if( Channel_status != End )
 		{
 			Receive_length[Channel_Num] = New_count + ((uint32_t)Update_Num * TIM4_PERIOD) - Last_count;
