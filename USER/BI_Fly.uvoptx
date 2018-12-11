@@ -172,7 +172,7 @@
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>Receive_length</ItemText>
+          <ItemText>Receive_length,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>

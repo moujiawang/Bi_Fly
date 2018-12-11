@@ -12,27 +12,29 @@ void motor_init(void)
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);		//打开通用定时器3的时钟
 	//拍打机构电机控制——引脚配置
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);		//打开PA引脚的时钟
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);		//打开PA引脚的时钟	
-	GPIO_def.GPIO_Pin = GPIO_Pin_7;
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);		//打开PB引脚的时钟
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);		//打开AFIO的时钟	
+	
+	GPIO_def.GPIO_Pin = GPIO_Pin_0;
 	GPIO_def.GPIO_Mode = GPIO_Mode_AF_PP;
 //	GPIO_def.GPIO_OType = GPIO_OType_PP;						//推免输出
 	GPIO_def.GPIO_Speed = GPIO_Speed_50MHz;
 			
-	GPIO_Init(GPIOA,&GPIO_def);
+	GPIO_Init(GPIOB,&GPIO_def);
 
 			
 //	GPIO_PinAFConfig(GPIOA,GPIO_PinSource6,GPIO_AF_TIM3);
 		
 	//爬行机构电机控制——引脚配置
 			
-	GPIO_def.GPIO_Pin = GPIO_Pin_6;
+	GPIO_def.GPIO_Pin = GPIO_Pin_1;
 	GPIO_def.GPIO_Mode = GPIO_Mode_AF_PP;
 //	GPIO_def.GPIO_Mode = GPIO_Mode_Out_PP;
 //	GPIO_def.GPIO_OType = GPIO_OType_PP;						//推免输出
 	GPIO_def.GPIO_Speed = GPIO_Speed_50MHz;
 
-	GPIO_Init(GPIOA,&GPIO_def);
-	GPIO_ResetBits(GPIOA,GPIO_Pin_6);
+	GPIO_Init(GPIOB,&GPIO_def);
+	
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);		//打开通用定时器3的时钟
 			
 //	GPIO_PinAFConfig(GPIOA,GPIO_PinSource7,GPIO_AF_TIM3);

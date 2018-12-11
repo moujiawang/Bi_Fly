@@ -16,13 +16,12 @@ void DTU_init(void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB | RCC_APB2Periph_AFIO, ENABLE);			//打开PB引脚的时钟
 	
 	GPIO_def.GPIO_Pin = GPIO_Pin_7;
-	GPIO_def.GPIO_Mode = GPIO_Mode_IPD;						// 
+	GPIO_def.GPIO_Mode = GPIO_Mode_IPD;							// 
 //	GPIO_def.GPIO_OType = GPIO_OType_PP;						//推免输出
 	GPIO_def.GPIO_Speed = GPIO_Speed_50MHz;
 	
 	GPIO_Init(GPIOB,&GPIO_def);
 	
-//	GPIO_PinAFConfig(GPIOB,GPIO_PinSource6,GPIO_AF_TIM4);
 
 //数传模块接收机油门摇杆推满100，对应脉宽是0.586ms，推到负满量程-100，对应脉宽是1.414ms
 	TIM_TimeBaseInitStruct.TIM_Prescaler = (9-1);				//72MHZ/9等于定时器计数器1秒钟计数的次数，也就是8MHZ，那每计数一次时间为0.000125ms
@@ -80,135 +79,70 @@ void Command_manage(int32_t Command_length[])
 			FlyorClimb_Flag = FLY;
 		else 
 			FlyorClimb_Flag = CLIMB;
-//对飞或爬的指令进行处理
-/*	if(FlyorClimb_Flag == FlyorClimb_lastFlag)					//飞爬状态没有变化，只需要刷新PWM波的占空比就行
-	{
-		switch(FlyorClimb_Flag)
-		{
-			case FLY:
-			{
-				PWM_length = ((abs(Command_length[1] - 12000)) >> 7)*80;
-				TIM_SetCompare1(TIM3,PWM_length);
-			};break;
-			case CLIMB:
-			{
-				PWM_length = ((abs(Command_length[1] - 12000)) >> 7)*80;
-				TIM_SetCompare2(TIM3,PWM_length);
-			};break;
-			default:;
-		}
-	}
-	else														//飞爬状态变化，需要（1）停止当前PWM输出口的输出;(2)重新配置输出端口;(3)刷新PWM波的占空比;
-	{*/
+
 		switch(FlyorClimb_Flag)
 		{
 			case FLY:
 			{
 			//爬行机构电机控制--停止爬行
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Disable;
-				TIM_OC2Init(TIM3, &TIM_OCInitStruct);
+				TIM_OC4Init(TIM3, &TIM_OCInitStruct);
 			//拍打机构电机控制--使能，占空比设置
 				TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Enable;
 				TIM_OCInitStruct.TIM_Pulse = ((abs(Command_length[1] - 12000)) >> 7)*80;
 				TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
 
-				TIM_OC1Init(TIM3, &TIM_OCInitStruct);
-//						GPIO_SetBits(GPIOA,GPIO_Pin_6);
+				TIM_OC3Init(TIM3, &TIM_OCInitStruct);
+
 			};break;
 			case CLIMB:
 			{
 			//爬行机构电机控制--停止爬行
 				TIM_OCInitStruct.TIM_OutputState = TIM_OutputState_Disable;
-				TIM_OC1Init(TIM3, &TIM_OCInitStruct);
-//						GPIO_ResetBits(GPIOA,GPIO_Pin_6);
+				TIM_OC3Init(TIM3, &TIM_OCInitStruct);
+
 			//拍打机构电机控制--使能，占空比设置
 				TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Enable;
 				TIM_OCInitStruct.TIM_Pulse = ((abs(Command_length[1] - 12000)) >> 7)*80;
 				TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
 
-				TIM_OC2Init(TIM3, &TIM_OCInitStruct);
+				TIM_OC4Init(TIM3, &TIM_OCInitStruct);
 			};break;
 			default:
 			{
 			//爬行机构电机控制--停止爬行
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Disable;
-				TIM_OC1Init(TIM3, &TIM_OCInitStruct);
-//						GPIO_ResetBits(GPIOA,GPIO_Pin_6);
+				TIM_OC3Init(TIM3, &TIM_OCInitStruct);
+
 			//爬行机构电机控制--停止爬行
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Disable;
-				TIM_OC2Init(TIM3, &TIM_OCInitStruct);
+				TIM_OC4Init(TIM3, &TIM_OCInitStruct);
 			};break;
 		}
-//		FlyorClimb_lastFlag = FlyorClimb_Flag;					//记录当前飞爬状态
-//	}
-	//对舵机控制状态的指令进行处理
-/*	if(Control_Flag == Control_lastFlag)						//舵机控制状态没有变化，只需要刷新PWM波的占空比就行
-	{
+
 		switch(Control_Flag)
 		{
 			case ROLL:
 			{
 			//俯仰--占空比设置
-//				PWM_length = (Command_length[2] / 160) << 1;
-				PWM_length = ((Command_length[2] -12000)/75 + 75) << 1;
-				TIM_SetCompare2(TIM2,PWM_length);				
-			};break;
-			case PITCH:
-			{
-			//翻滚--占空比设置
-//				PWM_length = (Command_length[2] / 160) << 1;
-				PWM_length = ((Command_length[2] -12000)/75 + 75) << 1;
-				TIM_SetCompare3(TIM2,PWM_length);	
-			};break;
-			case YAW:
-			{
-			//偏航--占空比设置
-				PWM_length = (((Command_length[2] -12000) >> 8) +75)<< 1;
-				TIM_SetCompare4(TIM2,PWM_length);	
-			};break;
-			default:;break;
-		}
-	}
-	else														//舵机控制状态改变，需要（1）未选择的舵机返回起点位置;(2)刷新PWM波的占空比;
-	{*/
-		switch(Control_Flag)
-		{
-			case ROLL:
-			{
-			//俯仰--占空比设置
-//				PWM_length = (Command_length[2] / 160) << 1;
 				PWM_length = ((Command_length[2] -12000)/75 + 75) << 1;
 				TIM_SetCompare2(TIM2,PWM_length);
-//				PWM_length = 150;
-//				TIM_SetCompare3(TIM2,PWM_length);
-//				PWM_length = 150;
-//				TIM_SetCompare4(TIM2,PWM_length);							
 			};break;
 			case PITCH:
 			{
 			//翻滚--占空比设置
-//				PWM_length = 150;
-//				TIM_SetCompare2(TIM2,PWM_length);
-//				PWM_length = (Command_length[2] / 160) << 1;
 				PWM_length = ((Command_length[2] -12000)/75 + 75) << 1;
 				TIM_SetCompare3(TIM2,PWM_length);
-//				PWM_length = 150;
-//				TIM_SetCompare4(TIM2,PWM_length);
 			};break;
 			case YAW:
 			{
 			//偏航--占空比设置
-//				PWM_length = 150;
-//				TIM_SetCompare2(TIM2,PWM_length);
-//				PWM_length = 150;
-//				TIM_SetCompare3(TIM2,PWM_length);
 				PWM_length = (((Command_length[2] - 12000) >> 8) +72)<< 1;					
 				TIM_SetCompare4(TIM2,PWM_length);
 			};break;
 			default:;break;
 		}
-//		Control_lastFlag = Control_Flag;						//记录当前飞爬状态
-//	}
+
 }
