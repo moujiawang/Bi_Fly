@@ -60,6 +60,7 @@ dkms.conf
 /DebugConfig/
 /Output/
 /RTE/
+/OBJ/
 
 *.uvgui.*
 *.uvguix.*
