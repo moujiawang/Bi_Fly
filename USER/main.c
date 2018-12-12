@@ -16,20 +16,13 @@ volatile uint8_t Channel_status = End;
 volatile uint8_t Receive_complete_flag = 0;
 volatile uint8_t Do_Flag = 0;											//while loop time control flag，when Do_flag = 0，while loop can execute
 
-///////////////////////////////////imu filter part/////////////////////////////////////
-int16_t Math_hz=0;
-unsigned char PC_comm; //PC command key word
-float ypr[3]; // yaw pitch roll
-u8 state = 1;
-uint32_t system_micrsecond;
-OrientationEstimator estimator;
-#define Upload_Speed  15   //data upload frequency Hz
-#define upload_time (1000000/Upload_Speed)/2  // calculate upload time unit: us
-
+IMUFusion imu_fusion_module;
 
 int main(void)
 {
 	delay_init();
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);	
+	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
 	DTU_init();															//数传模块初始化
 	motor_init();														//电机控制定时器初始化
 //	IMU_init();	
@@ -41,14 +34,7 @@ int main(void)
 	TIM_Cmd(TIM3, ENABLE);												//使能TIM3
 	
 	////////////////IMU/////////////////
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);	
-	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
-	Initial_UART1(115200L);
-	load_config();  //从flash中读取配置信息 -->eeprom.c
-	IIC_Init();	 //初始化I2C接口
-	delay_ms(300);	//等待器件上电
-	IMU_init(&estimator); //初始化IMU和传感器
-	system_micrsecond = micros();
+	imu_fusion_init(&imu_fusion_module);
 	////////////////////////////////////
 	while(1)
 	{
@@ -60,14 +46,8 @@ int main(void)
 				Receive_complete_flag = 0;
 			}
 			Do_Flag = ~0;											
-//			IMU();	
 			//////////////////IMU////////////////////
-			IMU_getYawPitchRoll(&estimator, ypr); //姿态更新
-			Math_hz++; //解算次数 ++
-			if((micros()-system_micrsecond)>upload_time){
-				update_upload_state(&state, ypr, &Math_hz);
-				system_micrsecond = micros();	 //取系统时间 单位 us 
-			}
+			imu_fusion_do_run(&imu_fusion_module);
 			/////////////////////////////////////////
 		}
 	};

@@ -327,4 +327,26 @@ void IMU_getYawPitchRoll(OrientationEstimator* estimator, float * angles) {
   //if(angles[0]<0)angles[0]+=360.0f;  //将 -+180度  转成0-360度
 }
 
+#include "upload_state_machine.h"
+
+void imu_fusion_init(IMUFusion* imu_fusion_module)
+{
+	Initial_UART1(115200L);
+	load_config();  //从flash中读取配置信息 -->eeprom.c
+	IIC_Init();	 //初始化I2C接口
+	delay_ms(300);	//等待器件上电
+	IMU_init(&imu_fusion_module->estimator); //初始化IMU和传感器
+	imu_fusion_module->system_micrsecond = micros();
+}
+
+void imu_fusion_do_run(IMUFusion* imu_fusion_module)
+{
+	IMU_getYawPitchRoll(&imu_fusion_module->estimator, imu_fusion_module->ypr); //姿态更新
+	imu_fusion_module->math_hz++; //解算次数 ++
+	if((micros()-imu_fusion_module->system_micrsecond)>upload_time)
+	{
+		update_upload_state(&imu_fusion_module->upload_state, imu_fusion_module->ypr, &imu_fusion_module->math_hz);
+		imu_fusion_module->system_micrsecond = micros();	 //取系统时间 单位 us 
+	}
+}
 //------------------End of File----------------------------
