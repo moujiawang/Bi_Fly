@@ -85,6 +85,9 @@ void Command_manage(int32_t Command_length[])
 			case FLY:
 			{
 			//爬行机构电机控制--停止爬行
+				TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
+				TIM_OCInitStruct.TIM_Pulse = 150;
+				TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Disable;
 				TIM_OC4Init(TIM3, &TIM_OCInitStruct);
 			//拍打机构电机控制--使能，占空比设置
@@ -99,6 +102,9 @@ void Command_manage(int32_t Command_length[])
 			case CLIMB:
 			{
 			//爬行机构电机控制--停止爬行
+				TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
+				TIM_OCInitStruct.TIM_Pulse = 150;
+				TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
 				TIM_OCInitStruct.TIM_OutputState = TIM_OutputState_Disable;
 				TIM_OC3Init(TIM3, &TIM_OCInitStruct);
 
@@ -113,10 +119,16 @@ void Command_manage(int32_t Command_length[])
 			default:
 			{
 			//爬行机构电机控制--停止爬行
+				TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
+				//TIM_OCInitStruct.TIM_Pulse = 150;
+				TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Disable;
 				TIM_OC3Init(TIM3, &TIM_OCInitStruct);
 
 			//爬行机构电机控制--停止爬行
+				TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
+				//TIM_OCInitStruct.TIM_Pulse = 150;
+				TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Disable;
 				TIM_OC4Init(TIM3, &TIM_OCInitStruct);
 			};break;

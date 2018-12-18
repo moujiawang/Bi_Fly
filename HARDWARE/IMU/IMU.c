@@ -135,7 +135,7 @@ void IMU_init(OrientationEstimator* estimator)
 //	HMC5883L_SetUp();
 //	BMP180_init();
 //	Initial_Timer3();
-	// initialize quaternion
+// initialize quaternion
   	estimator->q0 = 1.0f;  //初始化四元数
   	estimator->q1 = 0.0f;
   	estimator->q2 = 0.0f;
@@ -339,10 +339,14 @@ void imu_fusion_init(IMUFusion* imu_fusion_module)
 	imu_fusion_module->system_micrsecond = micros();
 }
 
+#include "base_timer.h"
 void imu_fusion_do_run(IMUFusion* imu_fusion_module)
 {
 	IMU_getYawPitchRoll(&imu_fusion_module->estimator, imu_fusion_module->ypr); //姿态更新
 	imu_fusion_module->math_hz++; //解算次数 ++
+//	base_timer_get_us();
+//	SysTick->VAL;
+//	micros();
 	if((micros()-imu_fusion_module->system_micrsecond)>upload_time)
 	{
 		update_upload_state(&imu_fusion_module->upload_state, imu_fusion_module->ypr, &imu_fusion_module->math_hz);

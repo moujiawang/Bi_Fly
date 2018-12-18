@@ -25,7 +25,7 @@ int main(void)
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
 	DTU_init();															//数传模块初始化
 	motor_init();														//电机控制定时器初始化
-//	IMU_init();	
+
 	while(Receive_complete_flag == 0);									//等待第一次指令接收完成
 	Command_manage(Receive_length);
 	Receive_complete_flag = 0;
