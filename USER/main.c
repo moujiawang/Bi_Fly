@@ -21,6 +21,8 @@ IMUFusion imu_fusion_module;
 int main(void)
 {
 	delay_init();
+	Receive_length[0] = 1-2;
+	Receive_length[0] = abs(Receive_length[0]);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);	
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
 	DTU_init();															//数传模块初始化
