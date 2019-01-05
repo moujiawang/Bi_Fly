@@ -58,6 +58,7 @@ dkms.conf
 *.uvproj
 /List/
 **/Listing/
+**/Listings/
 /DebugConfig/
 /Output/
 /RTE/

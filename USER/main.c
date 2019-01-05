@@ -79,6 +79,7 @@ int main(void)
 			NRF24L01_PowerDown_Mode();
 			NRF24L01_RX_Mode();
 			RX_Result = NRF24L01_RxPacket(Rx_buf);
+			
 
 		}
 	};
