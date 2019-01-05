@@ -2,6 +2,7 @@
 #include "delay.h"
 #include "DTU.h"
 #include "motor.h"
+#include "24l01.h" 	
 #include "stdlib.h"
 #include "string.h"
 #include "upload_state_machine.h"
@@ -16,6 +17,13 @@ volatile uint8_t Channel_status = End;
 volatile uint8_t Receive_complete_flag = 0;
 volatile uint8_t Receive_Wrong_flag = 0;
 volatile uint8_t Do_Flag = 0;											//while loop time control flag，when Do_flag = 0，while loop can execute
+
+u16 T = 0;
+u16 t=0;	
+u8 Rx_buf[RX_PLOAD_WIDTH];
+u8 Tx_buf[TX_PLOAD_WIDTH];
+u8 RX_Result;
+u8 TX_Result;
 
 IMUFusion imu_fusion_module;
 
@@ -35,6 +43,7 @@ int main(void)
 	
 	TIM_Cmd(TIM2, ENABLE);												//使能TIM2
 	TIM_Cmd(TIM3, ENABLE);												//使能TIM3
+	NRF24L01_Init();    												//初始化NRF24L01 
 	
 	////////////////IMU/////////////////
 	imu_fusion_init(&imu_fusion_module);
@@ -51,15 +60,35 @@ int main(void)
 			Do_Flag = ~0;											
 			//////////////////IMU////////////////////
 			imu_fusion_do_run(&imu_fusion_module);
+//			IMU_getYawPitchRoll(&imu_fusion_module.estimator, imu_fusion_module.ypr); //姿态更新
+//			imu_fusion_module.math_hz++; //解算次数 ++
+//			//	base_timer_get_us();
+//			//	SysTick->VAL;
+//			//	micros();
+//			if((micros()-imu_fusion_module.system_micrsecond)>upload_time)
+//			{
+//				update_upload_state(&imu_fusion_module.upload_state, imu_fusion_module.ypr, &imu_fusion_module.math_hz);
+//				imu_fusion_module.system_micrsecond = micros();	 //取系统时间 单位 us 
+//			}
 			/////////////////////////////////////////
+			
+			
+			NRF24L01_PowerDown_Mode();
+			NRF24L01_TX_Mode();
+			TX_Result = NRF24L01_TxPacket(Tx_buf);
+			NRF24L01_PowerDown_Mode();
+			NRF24L01_RX_Mode();
+			RX_Result = NRF24L01_RxPacket(Rx_buf);
+
 		}
 	};
 }
 
 void TIM4_IRQHandler()
 {
-	if(TIM_GetITStatus(TIM4,TIM_IT_CC2) == 1)
+	if( TIM_GetITStatus(TIM4,TIM_IT_CC2) == 1 )
 	{
+
 		New_count = TIM_GetCapture2(TIM4);
 		if( Channel_status != End )
 		{
@@ -78,7 +107,12 @@ void TIM4_IRQHandler()
 	}
 	if(TIM_GetITStatus(TIM4,TIM_IT_Update) == 1)
 	{
-		Do_Flag = ~Do_Flag;											//Do_Flag刷新取反
+		T++;	
+		if(T == 50)													//50 * 1ms 执行一次while循环
+		{
+			Do_Flag = ~Do_Flag;										//Do_Flag刷新取反
+			T = 0;
+		}					
 		Update_Num++;
 		if( Update_Num > 3 )										//接收到的通道指令最大值为大于16000，小于17000，所以TIM4在通道指令没发完前最多可能溢出3次
 		{
