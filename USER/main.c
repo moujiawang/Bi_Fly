@@ -6,6 +6,7 @@
 #include "stdlib.h"
 #include "string.h"
 #include "upload_state_machine.h"
+#include "nrf_protocol.h"
 
 
 volatile uint32_t Last_count = 0;
@@ -79,6 +80,7 @@ int main(void)
 			NRF24L01_PowerDown_Mode();
 			NRF24L01_RX_Mode();
 			RX_Result = NRF24L01_RxPacket(Rx_buf);
+			command_dispatch(Rx_buf);
 			
 
 		}

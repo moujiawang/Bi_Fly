@@ -19,7 +19,7 @@ void motion_command(const uint8_t* data_address)
     temp_motion_control.y   = *(int16_t*)&data_address[2];
     temp_motion_control.z   = *(int16_t*)&data_address[4];
     temp_motion_control.yaw = *(int16_t*)&data_address[6];
-    SetActuatorControl(&temp_motion_control);
+    SetMotionControl(&temp_motion_control);
 }
 
 void pid_command(const uint8_t* data_address)
@@ -30,7 +30,7 @@ void pid_command(const uint8_t* data_address)
 void command_dispatch(const uint8_t* rx_buff )
 {
     uint16_t function_code = *(uint16_t*)rx_buff;
-    uint8_t* data_addr = &rx_buff[2];
+    const uint8_t* data_addr = &rx_buff[2];
 
     if(0x00a0 == function_code)
     {

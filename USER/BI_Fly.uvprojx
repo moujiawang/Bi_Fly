@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_MD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\USER;..\CORE;..\STM32F10x_FWLib\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\HARDWARE\DTU;..\HARDWARE\Motor;..\HARDWARE\IMU;..\HARDWARE\MPU6050;..\HARDWARE\UARTs;..\HARDWARE;..\HARDWARE\IIC;..\HARDWARE\EEPROM;..\HARDWARE\BaseTimer;..\HARDWARE\NRF24L01</IncludePath>
+              <IncludePath>..\USER;..\CORE;..\STM32F10x_FWLib\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\HARDWARE\DTU;..\HARDWARE\Motor;..\HARDWARE\IMU;..\HARDWARE\MPU6050;..\HARDWARE\UARTs;..\HARDWARE;..\HARDWARE\IIC;..\HARDWARE\EEPROM;..\HARDWARE\BaseTimer;..\HARDWARE\NRF24L01;..\nrf_protocol;..\HARDWARE\SPI</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -596,6 +596,31 @@
               <FileName>base_timer.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\BaseTimer\base_timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>24l01.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\NRF24L01\24l01.c</FilePath>
+            </File>
+            <File>
+              <FileName>spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\SPI\spi.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>nrf_protocol</GroupName>
+          <Files>
+            <File>
+              <FileName>nrf_protocol_variable.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\nrf_protocol\nrf_protocol_variable.c</FilePath>
+            </File>
+            <File>
+              <FileName>nrf_protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\nrf_protocol\nrf_protocol.c</FilePath>
             </File>
           </Files>
         </Group>

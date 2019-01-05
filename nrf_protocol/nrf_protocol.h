@@ -1,6 +1,6 @@
 #ifndef NRF_PROTOCOL_H
 #define NRF_PROTOCOL_H
-
+#include <stdint.h>
 typedef struct
 {
     uint16_t lift;
