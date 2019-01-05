@@ -74,3 +74,4 @@ JLinkLog.txt
 JLinkSettings.ini
 *.plg
 *.scvd
+/.vscode/
