@@ -1,7 +1,5 @@
 #include "stm32f10x_gpio.h"
 #include "stm32f10x_rcc.h"
-#include "stdlib.h"
-#include "string.h"
 #include "DTU.h"
 
 
@@ -55,94 +53,4 @@ void DTU_init(void)
 
 }
 
-void Command_manage(int32_t Command_length[])
-{
-	TIM_OCInitTypeDef TIM_OCInitStruct;
-	uint8_t Control_Flag = 0;
-	uint8_t FlyorClimb_Flag = 0;
-	int32_t PWM_length = 0;
 
-//判断当前哪个舵机受控
-	if((Command_length[4]-4000) <= 7000)
-		Control_Flag = PITCH;
-	else 
-		if( (Command_length[4]-4000) < 9000)
-			Control_Flag = ROLL;
-		else 
-			Control_Flag = YAW;
-
-//判断当前飞爬指令
-	if((7800 < (Command_length[6]-4000)) && ((Command_length[6]-4000) < 8200))
-		FlyorClimb_Flag = STOP;
-	else 
-		if((Command_length[6]-4000) < 7800)
-			FlyorClimb_Flag = FLY;
-		else 
-			FlyorClimb_Flag = CLIMB;
-
-		switch(FlyorClimb_Flag)
-		{
-			case FLY:
-			{
-			//爬行机构电机控制--停止爬行
-				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Disable;
-				TIM_OC4Init(TIM3, &TIM_OCInitStruct);
-			//拍打机构电机控制--使能，占空比设置
-				TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
-				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Enable;
-				TIM_OCInitStruct.TIM_Pulse = ((abs(Command_length[1] - 12000)) >> 7)*80;
-				TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
-
-				TIM_OC3Init(TIM3, &TIM_OCInitStruct);
-
-			};break;
-			case CLIMB:
-			{
-			//爬行机构电机控制--停止爬行
-				TIM_OCInitStruct.TIM_OutputState = TIM_OutputState_Disable;
-				TIM_OC3Init(TIM3, &TIM_OCInitStruct);
-
-			//拍打机构电机控制--使能，占空比设置
-				TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
-				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Enable;
-				TIM_OCInitStruct.TIM_Pulse = ((abs(Command_length[1] - 12000)) >> 7)*80;
-				TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
-
-				TIM_OC4Init(TIM3, &TIM_OCInitStruct);
-			};break;
-			default:
-			{
-			//爬行机构电机控制--停止爬行
-				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Disable;
-				TIM_OC3Init(TIM3, &TIM_OCInitStruct);
-
-			//爬行机构电机控制--停止爬行
-				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Disable;
-				TIM_OC4Init(TIM3, &TIM_OCInitStruct);
-			};break;
-		}
-
-		switch(Control_Flag)
-		{
-			case ROLL:
-			{
-			//俯仰--占空比设置
-				PWM_length = ((Command_length[2] -12000)/75 + 75) << 1;
-				TIM_SetCompare2(TIM2,PWM_length);
-			};break;
-			case PITCH:
-			{
-			//翻滚--占空比设置
-				PWM_length = ((Command_length[2] -12000)/75 + 75) << 1;
-				TIM_SetCompare3(TIM2,PWM_length);
-			};break;
-			case YAW:
-			{
-			//偏航--占空比设置
-				PWM_length = (((Command_length[2] - 12000) >> 8) +72)<< 1;					
-				TIM_SetCompare4(TIM2,PWM_length);
-			};break;
-			default:;break;
-		}
-
-}

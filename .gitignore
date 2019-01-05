@@ -57,14 +57,17 @@ dkms.conf
 *.uvoptx
 *.uvproj
 /List/
+**/Listing/
 /DebugConfig/
 /Output/
 /RTE/
 /OBJ/
+/USER/DebugConfig/
 
 *.uvgui.*
 *.uvguix.*
 *.uvproj.*
+*.uvoptx
 *.dep
 *.bak
 JLinkLog.txt
