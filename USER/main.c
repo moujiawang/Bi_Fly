@@ -3,8 +3,8 @@
 #include "DTU.h"
 #include "motor.h"
 #include "24l01.h" 	
-#include "stdlib.h"
-#include "string.h"
+#include <stdlib.h>
+#include <string.h>
 #include "upload_state_machine.h"
 #include "nrf_protocol.h"
 
@@ -27,6 +27,7 @@ u8 RX_Result;
 u8 TX_Result;
 
 IMUFusion imu_fusion_module;
+MOTION_STATUS Motion_Status;
 
 int main(void)
 {
@@ -37,13 +38,14 @@ int main(void)
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
 	DTU_init();															//数传模块初始化
 	motor_init();														//电机控制定时器初始化
-
-	while(Receive_complete_flag == 0);									//等待第一次指令接收完成
-	Command_manage(Receive_length);
-	Receive_complete_flag = 0;
-	
 	TIM_Cmd(TIM2, ENABLE);												//使能TIM2
 	TIM_Cmd(TIM3, ENABLE);												//使能TIM3
+	
+	while(Receive_complete_flag == 0);									//等待第一次指令接收完成
+	Command_manage(Receive_length,&Motion_Status);
+	Receive_complete_flag = 0;
+	
+
 	NRF24L01_Init();    												//初始化NRF24L01 
 	
 	////////////////IMU/////////////////
@@ -55,7 +57,7 @@ int main(void)
 		{
 			if(Receive_complete_flag == 1)
 			{
-				Command_manage(Receive_length);							
+				Command_manage(Receive_length, &Motion_Status);							
 				Receive_complete_flag = 0;
 			}
 			Do_Flag = ~0;											
@@ -74,13 +76,13 @@ int main(void)
 			/////////////////////////////////////////
 			
 			
-			NRF24L01_PowerDown_Mode();
-			NRF24L01_TX_Mode();
-			TX_Result = NRF24L01_TxPacket(Tx_buf);
-			NRF24L01_PowerDown_Mode();
-			NRF24L01_RX_Mode();
-			RX_Result = NRF24L01_RxPacket(Rx_buf);
-			command_dispatch(Rx_buf);
+//			NRF24L01_PowerDown_Mode();
+//			NRF24L01_TX_Mode();
+//			TX_Result = NRF24L01_TxPacket(Tx_buf);
+//			NRF24L01_PowerDown_Mode();
+//			NRF24L01_RX_Mode();
+//			RX_Result = NRF24L01_RxPacket(Rx_buf);
+//			command_dispatch(Rx_buf);
 			
 
 		}

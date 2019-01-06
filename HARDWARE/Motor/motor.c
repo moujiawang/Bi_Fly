@@ -4,7 +4,6 @@
 #include "string.h"
 #include "motor.h"
 
-MOTOR_STATUS Motion_Status;
 
 void motor_init(void)
 {
@@ -24,9 +23,6 @@ void motor_init(void)
 	GPIO_def.GPIO_Speed = GPIO_Speed_50MHz;
 			
 	GPIO_Init(GPIOB,&GPIO_def);
-
-			
-//	GPIO_PinAFConfig(GPIOA,GPIO_PinSource6,GPIO_AF_TIM3);
 		
 	//爬行机构电机控制——引脚配置
 			
@@ -109,7 +105,7 @@ void motor_init(void)
 }
 
 
-void Command_manage(int32_t Command_length[])
+void Command_manage(int32_t Command_length[],MOTION_STATUS* Motion_Status)
 {
 	TIM_OCInitTypeDef TIM_OCInitStruct;
 
@@ -118,21 +114,21 @@ void Command_manage(int32_t Command_length[])
 	
 //判断当前哪个舵机受控
 	if((Command_length[4]-4000) <= 7000)
-		Motion_Status.Control_Status = PITCH;
+		Motion_Status->Control_Status = PITCH;
 	else 
 		if( (Command_length[4]-4000) < 9000)
-			Motion_Status.Control_Status = ROLL;
+			Motion_Status->Control_Status = ROLL;
 		else 
-			Motion_Status.Control_Status = YAW;
+			Motion_Status->Control_Status = YAW;
 
 //判断当前飞爬指令
 	if((7800 < (Command_length[6]-4000)) && ((Command_length[6]-4000) < 8200))
-		Motion_Status.Motion_Status = STOP;
+		Motion_Status->Fly_or_Climb_Status = STOP;
 	else 
 		if((Command_length[6]-4000) < 7800)
-			Motion_Status.Motion_Status = FLY;
+			Motion_Status->Fly_or_Climb_Status = FLY;
 		else 
-			Motion_Status.Motion_Status = CLIMB;
+			Motion_Status->Fly_or_Climb_Status = CLIMB;
 //飞爬速度指令处理
 	if( (Command_length[1] <= 12064)  && (Command_length[1] > 11936) )
 		Motion_Pulse = 0;
@@ -150,7 +146,7 @@ void Command_manage(int32_t Command_length[])
 //舵机位置指令处理
 	Control_Pulse = ((Command_length[2] -12000)/75 + 75) << 1;	
 
-		switch(Motion_Status.Motion_Status)
+		switch(Motion_Status->Fly_or_Climb_Status)
 		{
 			case FLY:
 			{
@@ -204,7 +200,7 @@ void Command_manage(int32_t Command_length[])
 			};break;
 		}
 
-		switch(Motion_Status.Control_Status)
+		switch(Motion_Status->Control_Status)
 		{
 			case ROLL:
 			{

@@ -17,6 +17,10 @@ typedef struct
     int16_t yaw;
 }MotionDOF;
 
+#define STATUS_DATA 0x00A0;
+#define PID_DATA 0x00A1;
+
+
 void command_dispatch(const uint8_t* rx_buff );
 
 #endif

@@ -20,10 +20,10 @@ typedef struct
 	uint16_t Fly_Pulse;
 	uint16_t Climb_Pulse;
 	uint16_t Control_Status;
-	uint16_t Motion_Status;
-}MOTOR_STATUS;
+	uint16_t Fly_or_Climb_Status;
+}MOTION_STATUS;
 
 void motor_init(void);
-void Command_manage(int32_t Command_length[]);
+void Command_manage(int32_t Command_length[],MOTION_STATUS* Motion_Status);
 
 #endif

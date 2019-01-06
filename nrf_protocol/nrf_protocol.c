@@ -45,3 +45,22 @@ void command_dispatch(const uint8_t* rx_buff )
         //error
     }
 }
+
+//void command_patch(const uint8_t* tx_buff, uchar command_type)
+//{
+//	if(command_type == STATUS_DATA)
+//    {
+//        tx_buff[0] = (uint8_t)(STATUS_DATA >> 8);
+//        tx_buff[1] = (uint8_t)(STATUS_DATA | 0x00ff);
+//        
+//    }
+//    if(command_type == PID_DATA)
+//    {
+//        tx_buff[0] = (uint8_t)((PID_DATA >> 8 | 0x00ff));
+//        tx_buff[1] = (uint8_t)(PID_DATA | 0x00ff); 
+//              
+//    }
+
+//        
+
+//}
