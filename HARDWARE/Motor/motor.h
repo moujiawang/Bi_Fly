@@ -21,6 +21,7 @@ typedef struct
 	uint16_t Climb_Pulse;
 	uint16_t Control_Status;
 	uint16_t Fly_or_Climb_Status;
+	u8 test;
 }MOTION_STATUS;
 
 void motor_init(void);

@@ -1,6 +1,9 @@
 #ifndef NRF_PROTOCOL_H
 #define NRF_PROTOCOL_H
+#include "motor.h"
 #include <stdint.h>
+
+
 typedef struct
 {
     uint16_t lift;
@@ -17,10 +20,13 @@ typedef struct
     int16_t yaw;
 }MotionDOF;
 
-#define STATUS_DATA 0x00A0;
-#define PID_DATA 0x00A1;
+#define STATUS_DATA 0xA0
+#define PID_DATA 0xA1
 
 
-void command_dispatch(const uint8_t* rx_buff );
+void Command_dispatch(u8* rx_buff);
+void Command_patch(u8* tx_buff, u8 command_type,MOTION_STATUS* Motion_Status);
+
+
 
 #endif

@@ -159,7 +159,8 @@ void Command_manage(int32_t Command_length[],MOTION_STATUS* Motion_Status)
 			//拍打机构电机控制--使能，占空比设置
 				TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Enable;
-				TIM_OCInitStruct.TIM_Pulse = Motion_Pulse;
+				Motion_Status->Fly_Pulse = Motion_Pulse;
+				TIM_OCInitStruct.TIM_Pulse = Motion_Status->Fly_Pulse;
 				TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
 
 				TIM_OC3Init(TIM3, &TIM_OCInitStruct);
@@ -177,7 +178,8 @@ void Command_manage(int32_t Command_length[],MOTION_STATUS* Motion_Status)
 			//拍打机构电机控制--使能，占空比设置
 				TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Enable;
-				TIM_OCInitStruct.TIM_Pulse = Motion_Pulse;
+				Motion_Status->Climb_Pulse = Motion_Pulse; 
+				TIM_OCInitStruct.TIM_Pulse = Motion_Status->Climb_Pulse;
 				TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
 
 				TIM_OC4Init(TIM3, &TIM_OCInitStruct);
@@ -190,13 +192,14 @@ void Command_manage(int32_t Command_length[],MOTION_STATUS* Motion_Status)
 				TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Disable;
 				TIM_OC3Init(TIM3, &TIM_OCInitStruct);
-
+				Motion_Status->Climb_Pulse = 0;
 			//爬行机构电机控制--停止爬行
 				TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
 				//TIM_OCInitStruct.TIM_Pulse = 150;
 				TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Disable;
 				TIM_OC4Init(TIM3, &TIM_OCInitStruct);
+				Motion_Status->Fly_Pulse = 0;
 			};break;
 		}
 
@@ -205,17 +208,20 @@ void Command_manage(int32_t Command_length[],MOTION_STATUS* Motion_Status)
 			case ROLL:
 			{
 			//俯仰--占空比设置
-				TIM_SetCompare2(TIM2,Control_Pulse);
+				Motion_Status->Roll_Pulse =  Control_Pulse;
+				TIM_SetCompare2(TIM2,Motion_Status->Roll_Pulse);
 			};break;
 			case PITCH:
 			{
 			//翻滚--占空比设置
-				TIM_SetCompare3(TIM2,Control_Pulse);
+				Motion_Status->Pitch_Pulse =  Control_Pulse;
+				TIM_SetCompare3(TIM2,Motion_Status->Pitch_Pulse );
 			};break;
 			case YAW:
 			{
 			//偏航--占空比设置
-				TIM_SetCompare4(TIM2,Control_Pulse);
+				Motion_Status->Yaw_Pulse = Control_Pulse;
+				TIM_SetCompare4(TIM2,Motion_Status->Yaw_Pulse);
 			};break;
 			default:;break;
 		}

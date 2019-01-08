@@ -54,38 +54,31 @@ int main(void)
 	while(1)
 	{
 		if(Do_Flag == 0)
-		{
-			if(Receive_complete_flag == 1)
-			{
-				Command_manage(Receive_length, &Motion_Status);							
-				Receive_complete_flag = 0;
-			}
-			Do_Flag = ~0;											
+		{										
 			//////////////////IMU////////////////////
 			imu_fusion_do_run(&imu_fusion_module);
-//			IMU_getYawPitchRoll(&imu_fusion_module.estimator, imu_fusion_module.ypr); //姿态更新
-//			imu_fusion_module.math_hz++; //解算次数 ++
-//			//	base_timer_get_us();
-//			//	SysTick->VAL;
-//			//	micros();
-//			if((micros()-imu_fusion_module.system_micrsecond)>upload_time)
-//			{
-//				update_upload_state(&imu_fusion_module.upload_state, imu_fusion_module.ypr, &imu_fusion_module.math_hz);
-//				imu_fusion_module.system_micrsecond = micros();	 //取系统时间 单位 us 
-//			}
 			/////////////////////////////////////////
-			
-			
-//			NRF24L01_PowerDown_Mode();
-//			NRF24L01_TX_Mode();
-//			TX_Result = NRF24L01_TxPacket(Tx_buf);
-//			NRF24L01_PowerDown_Mode();
-//			NRF24L01_RX_Mode();
-//			RX_Result = NRF24L01_RxPacket(Rx_buf);
-//			command_dispatch(Rx_buf);
-			
-
+			Command_patch(Tx_buf, STATUS_DATA, &Motion_Status);
+			NRF24L01_PowerDown_Mode();
+			NRF24L01_TX_Mode();
+			TX_Result = NRF24L01_TxPacket(Tx_buf);
+			NRF24L01_PowerDown_Mode();
+			NRF24L01_RX_Mode();
+			Do_Flag = ~0;	
 		}
+		if(Receive_complete_flag == 1)
+		{
+			Command_manage(Receive_length, &Motion_Status);							
+			Receive_complete_flag = 0;
+		}
+		
+		RX_Result = NRF24L01_RxPacket(Rx_buf);
+//		Command_dispatch(Rx_buf);
+		if(RX_Result == 0)
+		{
+			Motion_Status.test = Rx_buf[0];
+		}
+		
 	};
 }
 
@@ -98,7 +91,7 @@ void TIM4_IRQHandler()
 		if( Channel_status != End )
 		{
 			Receive_length[Channel_Num] = New_count + ((uint32_t)Update_Num * TIM4_PERIOD) - Last_count;
-			if((Receive_length[Channel_Num] <= 8000) || (Receive_length[Channel_Num] >= 16000))
+			if(( Receive_length[Channel_Num] <= 8000 ) || ( Receive_length[Channel_Num] >= 16000 ))
 				Receive_Wrong_flag = 1;
 			Channel_Num++;
 		}

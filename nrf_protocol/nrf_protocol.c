@@ -1,4 +1,5 @@
 #include "nrf_protocol.h"
+#include "motor.h"
 #include "write_protocol_variable.h"
 #include <stdint.h>
 
@@ -27,7 +28,7 @@ void pid_command(const uint8_t* data_address)
 
 }
 
-void command_dispatch(const uint8_t* rx_buff )
+void Command_dispatch(u8* rx_buff )
 {
     uint16_t function_code = *(uint16_t*)rx_buff;
     const uint8_t* data_addr = &rx_buff[2];
@@ -46,21 +47,32 @@ void command_dispatch(const uint8_t* rx_buff )
     }
 }
 
-//void command_patch(const uint8_t* tx_buff, uchar command_type)
-//{
-//	if(command_type == STATUS_DATA)
-//    {
-//        tx_buff[0] = (uint8_t)(STATUS_DATA >> 8);
-//        tx_buff[1] = (uint8_t)(STATUS_DATA | 0x00ff);
-//        
-//    }
-//    if(command_type == PID_DATA)
-//    {
-//        tx_buff[0] = (uint8_t)((PID_DATA >> 8 | 0x00ff));
-//        tx_buff[1] = (uint8_t)(PID_DATA | 0x00ff); 
-//              
-//    }
-
-//        
-
-//}
+void Command_patch(u8 tx_buff[], u8 command_type, MOTION_STATUS* Motion_Status)
+{
+	if(command_type == STATUS_DATA)
+    {
+        tx_buff[0] = STATUS_DATA;
+        tx_buff[1] = (u8)Motion_Status->Fly_Pulse;
+        tx_buff[2] = (u8)Motion_Status->Climb_Pulse;
+        tx_buff[3] = (u8)Motion_Status->Roll_Pulse;
+        tx_buff[4] = (u8)Motion_Status->Pitch_Pulse;
+        tx_buff[5] = (u8)Motion_Status->Yaw_Pulse;
+        tx_buff[6] = Motion_Status->test;
+        tx_buff[7] = 0;
+        tx_buff[8] = 0;
+        tx_buff[9] = 0;
+    }
+    if(command_type == PID_DATA)
+    {
+        tx_buff[0] = PID_DATA;
+        tx_buff[1] = 0;
+        tx_buff[2] = 0;
+        tx_buff[3] = 0;
+        tx_buff[4] = 0;
+        tx_buff[5] = 0;
+        tx_buff[6] = 0;
+        tx_buff[7] = 0;
+        tx_buff[8] = 0;
+        tx_buff[9] = 0;
+    }
+}
