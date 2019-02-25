@@ -316,7 +316,7 @@ IMU_AHRSupdate(estimator,
 输入参数： 将要存放姿态角的数组首地址
 输出参数：没有
 *******************************************************************************/
-void IMU_getYawPitchRoll(OrientationEstimator* estimator, float * angles) {
+void IMU_getYawPitchRoll(OrientationEstimator* estimator, float *angles) {
   float q[4]; //　四元数
   volatile float gx=0.0, gy=0.0, gz=0.0; //估计重力方向
   IMU_getQ(estimator, q); //更新全局四元数
@@ -333,7 +333,7 @@ void imu_fusion_init(IMUFusion* imu_fusion_module)
 {
 	Initial_UART1(115200L);
 	load_config();  //从flash中读取配置信息 -->eeprom.c
-	IIC_Init();	 //初始化I2C接口
+	IIC_Init();	 	//初始化I2C接口
 	delay_ms(300);	//等待器件上电
 	IMU_init(&imu_fusion_module->estimator); //初始化IMU和传感器
 	imu_fusion_module->system_micrsecond = micros();

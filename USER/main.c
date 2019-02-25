@@ -7,6 +7,8 @@
 #include <string.h>
 #include "upload_state_machine.h"
 #include "nrf_protocol.h"
+#include "IncPID.h"
+
 
 
 volatile uint32_t Last_count = 0;
@@ -29,11 +31,13 @@ u8 TX_Result;
 IMUFusion imu_fusion_module;
 MOTION_STATUS Motion_Status;
 
+PID_PARA PID_Yaw_para;
+PID_PARA PID_Pitch_para;
+PID_PARA PID_Roll_para;
+
 int main(void)
 {
 	delay_init();
-	Receive_length[0] = 1-2;
-	Receive_length[0] = abs(Receive_length[0]);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);	
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
 	DTU_init();															//数传模块初始化

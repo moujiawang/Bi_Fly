@@ -112,15 +112,6 @@ void Command_manage(int32_t Command_length[],MOTION_STATUS* Motion_Status)
 	uint16_t Control_Pulse = 0;
 	uint16_t Motion_Pulse = 0;
 	
-//判断当前哪个舵机受控
-	if((Command_length[4]-4000) <= 7000)
-		Motion_Status->Control_Status = PITCH;
-	else 
-		if( (Command_length[4]-4000) < 9000)
-			Motion_Status->Control_Status = ROLL;
-		else 
-			Motion_Status->Control_Status = YAW;
-
 //判断当前飞爬指令
 	if((7800 < (Command_length[6]-4000)) && ((Command_length[6]-4000) < 8200))
 		Motion_Status->Fly_or_Climb_Status = STOP;
