@@ -2,7 +2,7 @@
 #define NRF_PROTOCOL_VARIABLE_H
 #include "nrf_protocol.h"
 
-void SetActuatorControl(const ActuatorDOF* input);
-void SetMotionControl(const MotionDOF* input);
+void SetActuatorControl(const ACTUATOR_STATUS* input);
+void SetMotionControl(const MOTION_STATUS* input);
 
 #endif

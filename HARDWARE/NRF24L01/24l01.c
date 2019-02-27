@@ -50,7 +50,7 @@ void NRF24L01_Init(void)
 
 	SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;  //SPI设置为双线双向全双工
 	SPI_InitStructure.SPI_Mode = SPI_Mode_Master;		//SPI主机
-    SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;	//发送接收8位帧结构
+  SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;	//发送接收8位帧结构
 	SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;			//时钟悬空低
 	SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;		//数据捕获于第1个时钟沿
 	SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;			//NSS信号由软件控制

@@ -1,24 +1,24 @@
 #include "nrf_protocol.h"
 
-static ActuatorDOF actuator_control;
-static MotionDOF motion_control;
+static ACTUATOR_STATUS actuator_control;
+static MOTION_STATUS motion_control;
 
-const ActuatorDOF* GetActuatorControl()
+const ACTUATOR_STATUS* GetActuatorControl()
 {
     return &actuator_control;
 }
 
-void SetActuatorControl(const ActuatorDOF* input)
+void SetActuatorControl(const ACTUATOR_STATUS* input)
 {
     actuator_control = *input;
 }
 
-const MotionDOF* GetMotionControl()
+const MOTION_STATUS* GetMotionControl()
 {
     return &motion_control;
 }
 
-void SetMotionControl(const MotionDOF* input)
+void SetMotionControl(const MOTION_STATUS* input)
 {
     motion_control = *input;
 }

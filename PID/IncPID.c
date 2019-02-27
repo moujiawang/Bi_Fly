@@ -1,46 +1,47 @@
 #include "IncPID.h"
+#include "nrf_protocol.h"
 
 
-void IncPID_Init(PID_PARA *PID_Yaw_para, PID_PARA *PID_Pitch_para, PID_PARA *PID_Roll_para) 
+void IncPID_Init(PID_PARAS *PID_paras) 
 {
-    PID_Yaw_para->Error_Int = 0;            	//e[k]
-    PID_Yaw_para->LastError_Int = 0;            //e[k-1]
-	PID_Yaw_para->PreError_Int = 0;             //e[k-2]
-	PID_Yaw_para->Error_Ext = 0;            	//e[k]
-    PID_Yaw_para->LastError_Ext = 0;            //e[k-1]
-	PID_Yaw_para->PreError_Ext = 0;             //e[k-2]
-    PID_Yaw_para->Kp_Int=0;      			//比例常数 Proportional Const
-    PID_Yaw_para->Ki_Int=0;        		//积分常数  Integral Const
-    PID_Yaw_para->Kd_Int=0;      			//微分常数 Derivative Const
-	PID_Yaw_para->Kp_Ext=0;      			//比例常数 Proportional Const
-    PID_Yaw_para->Ki_Ext=0;        		//积分常数  Integral Const
-    PID_Yaw_para->Kd_Ext=0;      			//微分常数 Derivative Const
+    PID_paras->PID_Yaw_para.Error_Int = 0;            	//e[k]
+    PID_paras->PID_Yaw_para.LastError_Int = 0;            //e[k-1]
+		PID_paras->PID_Yaw_para.PreError_Int = 0;             //e[k-2]
+		PID_paras->PID_Yaw_para.Error_Ext = 0;            	//e[k]
+		PID_paras->PID_Yaw_para.LastError_Ext = 0;            //e[k-1]
+		PID_paras->PID_Yaw_para.PreError_Ext = 0;             //e[k-2]
+    PID_paras->PID_Yaw_para.Kp_Int=0;      			//比例常数 Proportional Const
+    PID_paras->PID_Yaw_para.Ki_Int=0;        		//积分常数  Integral Const
+    PID_paras->PID_Yaw_para.Kd_Int=0;      			//微分常数 Derivative Const
+		PID_paras->PID_Yaw_para.Kp_Ext=0;      			//比例常数 Proportional Const
+    PID_paras->PID_Yaw_para.Ki_Ext=0;        		//积分常数  Integral Const
+    PID_paras->PID_Yaw_para.Kd_Ext=0;      			//微分常数 Derivative Const
 
-	PID_Pitch_para->Error_Int = 0;            	//e[k]
-    PID_Pitch_para->LastError_Int = 0;          //e[k-1]
-	PID_Pitch_para->PreError_Int = 0;           //e[k-2]
-	PID_Pitch_para->Error_Ext = 0;            	//e[k]
-    PID_Pitch_para->LastError_Ext = 0;          //e[k-1]
-	PID_Pitch_para->PreError_Ext = 0;           //e[k-2]
-    PID_Pitch_para->Kp_Int=0;      		//比例常数 Proportional Const
-    PID_Pitch_para->Ki_Int=0;        		//积分常数  Integral Const
-    PID_Pitch_para->Kd_Int=0;      		//微分常数 Derivative Const
-	PID_Pitch_para->Kp_Ext=0;      		//比例常数 Proportional Const
-    PID_Pitch_para->Ki_Ext=0;        		//积分常数  Integral Const
-    PID_Pitch_para->Kd_Ext=0;      		//微分常数 Derivative Const
-	
-	PID_Roll_para->Error_Int = 0;            	//e[k]
-    PID_Roll_para->LastError_Int = 0;           //e[k-1]
-	PID_Roll_para->PreError_Int = 0;            //e[k-2]
-	PID_Roll_para->Error_Ext = 0;            	//e[k]
-    PID_Roll_para->LastError_Ext = 0;           //e[k-1]
-	PID_Roll_para->PreError_Ext = 0;            //e[k-2]
-    PID_Roll_para->Kp_Int=0;      			//比例常数 Proportional Const
-    PID_Roll_para->Ki_Int=0;        		//积分常数  Integral Const
-    PID_Roll_para->Kd_Int=0;      			//微分常数 Derivative Const
-	PID_Roll_para->Kp_Ext=0;      			//比例常数 Proportional Const
-    PID_Roll_para->Ki_Ext=0;        		//积分常数  Integral Const
-    PID_Roll_para->Kd_Ext=0;      			//微分常数 Derivative Const
+		PID_paras->PID_Pitch_para.Error_Int = 0;            	//e[k]
+    PID_paras->PID_Pitch_para.LastError_Int = 0;          //e[k-1]
+		PID_paras->PID_Pitch_para.PreError_Int = 0;           //e[k-2]
+		PID_paras->PID_Pitch_para.Error_Ext = 0;            	//e[k]
+    PID_paras->PID_Pitch_para.LastError_Ext = 0;          //e[k-1]
+		PID_paras->PID_Pitch_para.PreError_Ext = 0;           //e[k-2]
+    PID_paras->PID_Pitch_para.Kp_Int=0;      		//比例常数 Proportional Const
+    PID_paras->PID_Pitch_para.Ki_Int=0;        		//积分常数  Integral Const
+    PID_paras->PID_Pitch_para.Kd_Int=0;      		//微分常数 Derivative Const
+		PID_paras->PID_Pitch_para.Kp_Ext=0;      		//比例常数 Proportional Const
+    PID_paras->PID_Pitch_para.Ki_Ext=0;        		//积分常数  Integral Const
+    PID_paras->PID_Pitch_para.Kd_Ext=0;      		//微分常数 Derivative Const
+		
+		PID_paras->PID_Roll_para.Error_Int = 0;            	//e[k]
+    PID_paras->PID_Roll_para.LastError_Int = 0;           //e[k-1]
+		PID_paras->PID_Roll_para.PreError_Int = 0;            //e[k-2]
+		PID_paras->PID_Roll_para.Error_Ext = 0;            	//e[k]
+    PID_paras->PID_Roll_para.LastError_Ext = 0;           //e[k-1]
+		PID_paras->PID_Roll_para.PreError_Ext = 0;            //e[k-2]
+    PID_paras->PID_Roll_para.Kp_Int=0;      			//比例常数 Proportional Const
+    PID_paras->PID_Roll_para.Ki_Int=0;        		//积分常数  Integral Const
+    PID_paras->PID_Roll_para.Kd_Int=0;      			//微分常数 Derivative Const
+		PID_paras->PID_Roll_para.Kp_Ext=0;      			//比例常数 Proportional Const
+    PID_paras->PID_Roll_para.Ki_Ext=0;        		//积分常数  Integral Const
+    PID_paras->PID_Roll_para.Kd_Ext=0;      			//微分常数 Derivative Const
 }
 
 /**************************************************************/

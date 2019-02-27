@@ -331,8 +331,8 @@ void IMU_getYawPitchRoll(OrientationEstimator* estimator, float *angles) {
 
 void imu_fusion_init(IMUFusion* imu_fusion_module)
 {
-	Initial_UART1(115200L);
-	load_config();  //从flash中读取配置信息 -->eeprom.c
+//	Initial_UART1(115200L);
+//	load_config();  //从flash中读取配置信息 -->eeprom.c
 	IIC_Init();	 	//初始化I2C接口
 	delay_ms(300);	//等待器件上电
 	IMU_init(&imu_fusion_module->estimator); //初始化IMU和传感器

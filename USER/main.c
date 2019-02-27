@@ -27,34 +27,45 @@ u8 Rx_buf[RX_PLOAD_WIDTH];
 u8 Tx_buf[TX_PLOAD_WIDTH];
 u8 RX_Result;
 u8 TX_Result;
+u8 Mode_ID;
 
 IMUFusion imu_fusion_module;
+ACTUATOR_STATUS Actuator_Status;
 MOTION_STATUS Motion_Status;
-
-PID_PARA PID_Yaw_para;
-PID_PARA PID_Pitch_para;
-PID_PARA PID_Roll_para;
+PID_PARAS PID_paras;
 
 int main(void)
 {
 	delay_init();
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);	
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
-	DTU_init();															//数传模块初始化
-	motor_init();														//电机控制定时器初始化
-	TIM_Cmd(TIM2, ENABLE);												//使能TIM2
-	TIM_Cmd(TIM3, ENABLE);												//使能TIM3
-	
-	while(Receive_complete_flag == 0);									//等待第一次指令接收完成
-	Command_manage(Receive_length,&Motion_Status);
-	Receive_complete_flag = 0;
-	
-
-	NRF24L01_Init();    												//初始化NRF24L01 
-	
+	DTU_init();																																			//数传模块初始化
+	motor_init();																																		//电机控制定时器初始化
+	TIM_Cmd(TIM2, ENABLE);																													//使能TIM2
+	TIM_Cmd(TIM3, ENABLE);																													//使能TIM3
+	NRF24L01_Init();    																														//初始化NRF24L01 
+	load_config();  																																//从flash中读取配置信息 -->eeprom.c
+	Initial_UART1(115200L);																													//初始化串口
 	////////////////IMU/////////////////
 	imu_fusion_init(&imu_fusion_module);
 	////////////////////////////////////
+		
+	while((Receive_complete_flag == 0) || NRF24L01_Check() );												//等待第一次指令接收完成
+	Receive_complete_flag = 0;
+	NRF24L01_PowerDown_Mode();
+	NRF24L01_RX_Mode();
+	while(NRF24L01_RxPacket(Rx_buf));
+	Mode_ID = Command_dispatch(Rx_buf, &Actuator_Status, &Motion_Status, &PID_paras);//解包，刷新控制参数，赋值给各自的控制参数结构体中
+	switch(Mode_ID)
+	{
+		case 0xa0:;break;
+		case 0xa1:;break;
+		case 0xa2:;break;
+	}
+	
+
+	
+
 	while(1)
 	{
 		if(Do_Flag == 0)
@@ -62,7 +73,7 @@ int main(void)
 			//////////////////IMU////////////////////
 			imu_fusion_do_run(&imu_fusion_module);
 			/////////////////////////////////////////
-			Command_patch(Tx_buf, STATUS_DATA, &Motion_Status);
+			Command_patch(Tx_buf, STATUS_DATA, &Actuator_Status);
 			NRF24L01_PowerDown_Mode();
 			NRF24L01_TX_Mode();
 			TX_Result = NRF24L01_TxPacket(Tx_buf);
@@ -72,7 +83,7 @@ int main(void)
 		}
 		if(Receive_complete_flag == 1)
 		{
-			Command_manage(Receive_length, &Motion_Status);							
+			Command_manage(Receive_length, &Actuator_Status);							
 			Receive_complete_flag = 0;
 		}
 		
@@ -80,7 +91,7 @@ int main(void)
 //		Command_dispatch(Rx_buf);
 		if(RX_Result == 0)
 		{
-			Motion_Status.test = Rx_buf[0];
+			Actuator_Status.test = Rx_buf[0];
 		}
 		
 	};
