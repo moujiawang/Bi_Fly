@@ -79,6 +79,7 @@ u8 NRF24L01_Check(void);						//检查24L01是否存在
 u8 NRF24L01_TxPacket(u8 *txbuf);				//发送一个包的数据
 u8 NRF24L01_RxPacket(u8 *rxbuf);				//接收一个包的数据
 void NRF24L01_PowerDown_Mode(void);				//配置为power down模式
+u8 NRF24L01_Handshake();						//NRF24L01握手程序，检查NRF24L01是否通讯正常
 #endif
 
 

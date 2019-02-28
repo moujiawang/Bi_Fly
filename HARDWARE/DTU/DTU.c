@@ -53,4 +53,8 @@ void DTU_init(void)
 
 }
 
+u8  DTU_Handshake()
+{
+	
+}
 

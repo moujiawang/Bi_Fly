@@ -1,7 +1,10 @@
+#include <stdint.h>
 #include "24l01.h"
 #include "delay.h"
 #include "spi.h"
 #include "usart.h"
+#include "nrf_protocol.h"
+  
 //////////////////////////////////////////////////////////////////////////////////	 
 //本程序只供学习使用，未经作者许可，不得用于其它任何用途
 //ALIENTEK战舰STM32开发板
@@ -214,6 +217,55 @@ void NRF24L01_PowerDown_Mode(void)
 //	NRF24L01_CE=1;//CE为高,10us后启动发送
 }
 
+u8 NRF24L01_Handshake()
+{
+	u8 NRF_status = 0;
+	u8 Tx_buf[TX_PLOAD_WIDTH];
+	u8 Rx_buf[RX_PLOAD_WIDTH];
+	u8 i = 0;
+	if( NRF24L01_Check() == 1 )						  //没有检测到NRF24L01的存在
+	{
+		NRF_status &= NRF_OFF;						  
+	}
+	else
+	{
+		NRF_status |= NRF_ON;
+		//发送握手信号，等待握手信号接收，如果接收握手码正确，则NRF_OK;
+		NRF24L01_PowerDown_Mode();
+		NRF24L01_TX_Mode();
+		Tx_buf[0] =0xaa;
+		if( NRF24L01_TxPacket(Tx_buf) == TX_OK )
+		{
+			NRF24L01_PowerDown_Mode();
+			NRF24L01_RX_Mode();
 
+			while( NRF24L01_RxPacket(Rx_buf) )
+			{
+				i++;
+				delay_ms(2);
+				if( i == 255) 							//如果255次循环后，还没有能接收到握手码，则说明NRF没有连接
+				{
+					NRF_status &= NRF_DISCONNECTED;  
+					break;
+				}
+			}
+			if( ( Rx_buf[0] + 0xaa ) == 0xff )			//如果接收到的握手码与发送的握手码相加等于0xff，说明握手正确，通讯正常；			
+			{
+				NRF_status |= NRF_OK;
+			}
+			else
+			{
+				NRF_status &= NRF_DISCONNECTED;  
+			}
+		}
+		else
+		{
+			NRF_status &= NRF_DISCONNECTED;  
+		}
+
+	}
+
+	return NRF_status;
+}
 
 

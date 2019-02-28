@@ -33,47 +33,58 @@ IMUFusion imu_fusion_module;
 ACTUATOR_STATUS Actuator_Status;
 MOTION_STATUS Motion_Status;
 PID_PARAS PID_paras;
+SYS_STATUS SYS_status; 
 
 int main(void)
 {
+	u8 i = 0;
 	delay_init();
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);	
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
-	DTU_init();																																			//数传模块初始化
-	motor_init();																																		//电机控制定时器初始化
-	TIM_Cmd(TIM2, ENABLE);																													//使能TIM2
-	TIM_Cmd(TIM3, ENABLE);																													//使能TIM3
-	NRF24L01_Init();    																														//初始化NRF24L01 
-	load_config();  																																//从flash中读取配置信息 -->eeprom.c
-	Initial_UART1(115200L);																													//初始化串口
+	DTU_init();																		//数传模块初始化
+	motor_init();																	//电机控制定时器初始化
+	TIM_Cmd(TIM2, ENABLE);															//使能TIM2
+	TIM_Cmd(TIM3, ENABLE);															//使能TIM3
+	NRF24L01_Init();    															//初始化NRF24L01 
+	load_config();  																//从flash中读取配置信息 -->eeprom.c
+	Initial_UART1(115200L);															//初始化串口
 	////////////////IMU/////////////////
 	imu_fusion_init(&imu_fusion_module);
 	////////////////////////////////////
+	SYS_status.DTU_NRF_Status = NRF24L01_Handshake();								//握手，并更新NRF的在线通讯状态值，同时将模式值设为0
+	
 		
-	while((Receive_complete_flag == 0) || NRF24L01_Check() );												//等待第一次指令接收完成
-	Receive_complete_flag = 0;
+/*	while(Receive_complete_flag == 0 )												//等待DTU第一次握手
+	{
+		i++;
+		delay_ms(2);
+		if( i == 255) 	
+		{
+			SYS_status.DTU_NRF_Status 
+			break;
+		}
+	};										
+	Receive_complete_flag = 0;*/		
 	NRF24L01_PowerDown_Mode();
 	NRF24L01_RX_Mode();
 	while(NRF24L01_RxPacket(Rx_buf));
 	Mode_ID = Command_dispatch(Rx_buf, &Actuator_Status, &Motion_Status, &PID_paras);//解包，刷新控制参数，赋值给各自的控制参数结构体中
 	switch(Mode_ID)
 	{
-		case 0xa0:;break;
-		case 0xa1:;break;
-		case 0xa2:;break;
+		case 0x20:Actuator_command(&Actuator_Status);break;
+		case 0x2f:Motion_command(&Motion_Status);break;
+		case 0x30:PID_command(&PID_paras);break;
+		defualt:;
 	}
-	
-
-	
 
 	while(1)
 	{
-		if(Do_Flag == 0)
+/*		if(Do_Flag == 0)
 		{										
 			//////////////////IMU////////////////////
 			imu_fusion_do_run(&imu_fusion_module);
 			/////////////////////////////////////////
-			Command_patch(Tx_buf, STATUS_DATA, &Actuator_Status);
+			Command_patch(Tx_buf, &PID_paras, &Actuator_Status, &imu_fusion_module);
 			NRF24L01_PowerDown_Mode();
 			NRF24L01_TX_Mode();
 			TX_Result = NRF24L01_TxPacket(Tx_buf);
@@ -92,12 +103,12 @@ int main(void)
 		if(RX_Result == 0)
 		{
 			Actuator_Status.test = Rx_buf[0];
-		}
+		}*/
 		
 	};
 }
 
-void TIM4_IRQHandler()
+/*void TIM4_IRQHandler()
 {
 	if( TIM_GetITStatus(TIM4,TIM_IT_CC2) == 1 )
 	{
@@ -142,6 +153,6 @@ void TIM4_IRQHandler()
 		}
 		TIM_ClearFlag(TIM4,TIM_IT_Update);
 	}
-}
+}*/
 
 

@@ -17,5 +17,10 @@
 
 void motor_init(void);
 void Command_manage(int32_t Command_length[],ACTUATOR_STATUS* Actuator_Status);
+void Actuator_command(const ACTUATOR_STATUS* Actuator_Status);
+void Motion_command(const MOTION_STATUS* Motion_Status);
+void PID_command(const PID_PARAS* PID_paras);
 
 #endif
+
+
