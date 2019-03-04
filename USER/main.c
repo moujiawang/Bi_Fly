@@ -37,11 +37,11 @@ SYS_STATUS SYS_status;
 
 int main(void)
 {
-	u8 i = 0;
+//	u8 i = 0;
 	delay_init();
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);	
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
-	DTU_init();																		//数传模块初始化
+//	DTU_init();																		//数传模块初始化
 	motor_init();																	//电机控制定时器初始化
 	TIM_Cmd(TIM2, ENABLE);															//使能TIM2
 	TIM_Cmd(TIM3, ENABLE);															//使能TIM3
@@ -51,9 +51,12 @@ int main(void)
 	////////////////IMU/////////////////
 	imu_fusion_init(&imu_fusion_module);
 	////////////////////////////////////
-	SYS_status.DTU_NRF_Status = NRF24L01_Handshake();								//握手，并更新NRF的在线通讯状态值，同时将模式值设为0
+	do
+	{
+		SYS_status.DTU_NRF_Status = NRF24L01_Handshake();							//握手，并更新NRF的在线通讯状态值，同时将模式值设为0
+	}
+	while( (SYS_status.DTU_NRF_Status & 0x02) == 0x00 );							//直至握手成功
 	
-		
 /*	while(Receive_complete_flag == 0 )												//等待DTU第一次握手
 	{
 		i++;
@@ -65,7 +68,7 @@ int main(void)
 		}
 	};										
 	Receive_complete_flag = 0;*/		
-	NRF24L01_PowerDown_Mode();
+/*	NRF24L01_PowerDown_Mode();
 	NRF24L01_RX_Mode();
 	while(NRF24L01_RxPacket(Rx_buf));
 	Mode_ID = Command_dispatch(Rx_buf, &Actuator_Status, &Motion_Status, &PID_paras);//解包，刷新控制参数，赋值给各自的控制参数结构体中
@@ -76,9 +79,22 @@ int main(void)
 		case 0x30:PID_command(&PID_paras);break;
 		defualt:;
 	}
-
+*/
 	while(1)
 	{
+		if( NRF24L01_RxPacket(Rx_buf) == 0 )
+		{
+			Command_dispatch(Rx_buf, &Actuator_Status, &Motion_Status, &PID_paras);
+			switch(Mode_ID)
+			{
+				case 0x20:Actuator_command(&Actuator_Status);break;
+				case 0x2f:Motion_command(&Motion_Status);break;
+				case 0x30:PID_command(&PID_paras);break;
+				defualt:;
+			}
+		};
+		
+
 /*		if(Do_Flag == 0)
 		{										
 			//////////////////IMU////////////////////

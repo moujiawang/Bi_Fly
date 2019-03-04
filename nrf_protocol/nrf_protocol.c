@@ -70,7 +70,7 @@ void PID_assignment(const u8 *rx_buff, PID_PARAS *PID_paras)
 			PID_paras->PID_Roll_para.Ki_Ext = *(rx_buff+5);
 			PID_paras->PID_Roll_para.Kd_Ext = *(rx_buff+6);
 			PID_paras->PID_Roll_para.SetPoint_Ext= *(int16_t*)&rx_buff[7];
-		};break;;break;
+		};break;
 		defualt:;break;
 	}
 }
@@ -118,7 +118,7 @@ void Command_patch(u8* tx_buff, PID_PARAS *PID_paras, ACTUATOR_STATUS* Actuator_
 			*(tx_buff+9)  = PID_paras->PID_Pitch_para.Ki_Ext;
 			*(tx_buff+10) = PID_paras->PID_Pitch_para.Kd_Ext;
 			*(tx_buff+11) = PID_paras->PID_Pitch_para.SetPoint_Ext;
-		};break;;break;
+		};break;
 		case 0x03:
 		{
 			*(tx_buff+5)  = PID_paras->PID_Roll_para.Kp_Int;
@@ -128,7 +128,7 @@ void Command_patch(u8* tx_buff, PID_PARAS *PID_paras, ACTUATOR_STATUS* Actuator_
 			*(tx_buff+9)  = PID_paras->PID_Roll_para.Ki_Ext;
 			*(tx_buff+10) = PID_paras->PID_Roll_para.Kd_Ext;
 			*(tx_buff+11) = PID_paras->PID_Roll_para.SetPoint_Ext;
-		};break;;break;
+		};break;
     }
 	*(float*)&tx_buff[12] = Attitude->ypr[0];
 	*(float*)&tx_buff[15] = Attitude->ypr[1];

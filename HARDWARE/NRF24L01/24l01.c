@@ -217,7 +217,7 @@ void NRF24L01_PowerDown_Mode(void)
 //	NRF24L01_CE=1;//CE为高,10us后启动发送
 }
 
-u8 NRF24L01_Handshake()
+u8 NRF24L01_Handshake(void)
 {
 	u8 NRF_status = 0;
 	u8 Tx_buf[TX_PLOAD_WIDTH];
