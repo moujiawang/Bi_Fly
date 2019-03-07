@@ -243,24 +243,27 @@ u8 NRF24L01_Handshake(void)
 			{
 				i++;
 				delay_ms(2);
-				if( i == 255) 							//如果255次循环后，还没有能接收到握手码，则说明NRF没有连接
+				if( i == 255) 												 //如果255次循环后，还没有能接收到握手码，则说明NRF没有连接
 				{
 					NRF_status &= NRF_DISCONNECTED;  
 					break;
 				}
 			}
-			if( ( Rx_buf[0] + 0xaa ) == 0xff )			//如果接收到的握手码与发送的握手码相加等于0xff，说明握手正确，通讯正常；			
+			if( i < 255 )
 			{
-				NRF_status |= NRF_OK;
-			}
-			else
-			{
-				NRF_status &= NRF_DISCONNECTED;  
+				if( ( Rx_buf[0] + 0xaa ) == 0xff )			//如果接收到的握手码与发送的握手码相加等于0xff，说明握手正确，通讯正常；			
+				{
+					NRF_status |= NRF_CONNECTED;
+				}
+				else
+				{
+					NRF_status &= NRF_DISCONNECTED;  
+				}
 			}
 		}
 		else
 		{
-			NRF_status &= NRF_DISCONNECTED;  
+			NRF_status &= NRF_OFF;  
 		}
 
 	}

@@ -3,7 +3,26 @@
 
 #include <stdint.h>
 #include "stm32f10x.h"
-#include "IMU.h"
+
+typedef struct
+{
+    float q0;
+    float q1;
+    float q2;
+    float q3;
+    float ex_inte;
+    float ey_inte;
+    float ez_inte;
+} OrientationEstimator;
+
+typedef struct
+{
+	OrientationEstimator estimator;
+	float ypr[3];
+	uint32_t system_micrsecond;
+	u8 upload_state;
+	int16_t math_hz;
+}IMUFusion;
 
 typedef struct
 { 
@@ -74,7 +93,7 @@ typedef struct
 #define NRF_OFF           0xfe					//NRF不在线
 
 //NRF24L01 和 接收机通讯标志号
-#define NRF_OK            0x02	
+#define NRF_CONNECTED     0x02	
 #define NRF_DISCONNECTED  0xFD					//NRF通讯失败
 #define DTU_OK            0x03					//DTU接收机通讯正常就表明在线，DTU无是否在线的检测标志位
 
