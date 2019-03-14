@@ -23,8 +23,8 @@ volatile uint8_t Do_Flag = 0;											//while loop time control flag，when Do
 
 u16 T = 0;
 u16 t=0;	
-u8 Rx_buf[RX_PLOAD_WIDTH];
-u8 Tx_buf[TX_PLOAD_WIDTH];
+u8 Rx_buf[RX_PLOAD_WIDTH] = {0};
+u8 Tx_buf[TX_PLOAD_WIDTH] = {0};
 u8 RX_Result;
 u8 TX_Result;
 u8 Mode_ID;
@@ -46,10 +46,10 @@ int main(void)
 	TIM_Cmd(TIM2, ENABLE);															//使能TIM2
 	TIM_Cmd(TIM3, ENABLE);															//使能TIM3
 	NRF24L01_Init();    															//初始化NRF24L01 
-	load_config();  																//从flash中读取配置信息 -->eeprom.c
+/*	load_config();  																//从flash中读取配置信息 -->eeprom.c
 	Initial_UART1(115200L);															//初始化串口
 	////////////////IMU/////////////////
-	imu_fusion_init(&imu_fusion_module);
+	imu_fusion_init(&imu_fusion_module);*/
 	////////////////////////////////////
 	do
 	{

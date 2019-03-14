@@ -27,15 +27,9 @@ void NRF24L01_Init(void)
 	GPIO_InitTypeDef GPIO_InitStructure;
 	SPI_InitTypeDef  SPI_InitStructure;
 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);	 //使能PB,G端口时钟
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_SPI1, ENABLE );//PORTA时钟、SPI1时钟使能 	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);	 //使能PA端口时钟	
 	
-/*	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;				 //PB12上拉 防止W25X的干扰
- 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		 //推挽输出
- 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
- 	GPIO_Init(GPIOB, &GPIO_InitStructure);                   //初始化指定IO
- 	GPIO_SetBits(GPIOB,GPIO_Pin_12);                         //上拉	*/			
- 	
+
  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		 //推挽输出
  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;	 			 //PA--NSS 推挽 	  
@@ -53,7 +47,7 @@ void NRF24L01_Init(void)
 
 	SPI_InitStructure.SPI_Direction = SPI_Direction_2Lines_FullDuplex;  //SPI设置为双线双向全双工
 	SPI_InitStructure.SPI_Mode = SPI_Mode_Master;		//SPI主机
-  SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;	//发送接收8位帧结构
+    SPI_InitStructure.SPI_DataSize = SPI_DataSize_8b;	//发送接收8位帧结构
 	SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;			//时钟悬空低
 	SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;		//数据捕获于第1个时钟沿
 	SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;			//NSS信号由软件控制
@@ -65,18 +59,19 @@ void NRF24L01_Init(void)
 	SPI_Cmd(SPI1, ENABLE); //使能SPI外设
 			 
 //	NRF24L01_CE=0; 			//使能24L01
-	NRF24L01_CSN=1;			//SPI片选取消  		 	 
+//	NRF24L01_CSN=1;			//SPI片选取消  		 	 
 }
 //检测24L01是否存在
 //返回值:0，成功;1，失败	
 u8 NRF24L01_Check(void)
 {
-	u8 buf[5]={0XA5,0XA5,0XA5,0XA5,0XA5};
+	u8 buf[5];
 	u8 i;
+	for(i=0;i<5;i++) buf[i] = TX_ADDRESS[i];
 	SPI1_SetSpeed(SPI_BaudRatePrescaler_8); //spi速度为9Mhz（24L01的最大SPI时钟为10Mhz）   	 
 	NRF24L01_Write_Buf(NRF_WRITE_REG+TX_ADDR,buf,5);//写入5个字节的地址.	
 	NRF24L01_Read_Buf(TX_ADDR,buf,5); //读出写入的地址  
-	for(i=0;i<5;i++)if(buf[i]!=0XA5)break;	 							   
+	for(i=0;i<5;i++)if(buf[i]!=TX_ADDRESS[i])break;	 							   
 	if(i!=5)return 1;//检测24L01错误	
 	return 0;		 //检测到24L01
 }	 	 
@@ -142,7 +137,8 @@ u8 NRF24L01_TxPacket(u8 *txbuf)
   	NRF24L01_Write_Buf(WR_TX_PLOAD,txbuf,TX_PLOAD_WIDTH);//写数据到TX BUF  32个字节
 // 	NRF24L01_CE=1;//启动发送	   
 	while(NRF24L01_IRQ!=0);//等待发送完成
-	sta=NRF24L01_Read_Reg(STATUS);  //读取状态寄存器的值	   
+	sta=NRF24L01_Read_Reg(STATUS);  //读取状态寄存器的值	 
+	delay_ms(2);
 	NRF24L01_Write_Reg(NRF_WRITE_REG+STATUS,sta); //清除TX_DS或MAX_RT中断标志
 	if(sta&MAX_TX)//达到最大重发次数
 	{
@@ -219,9 +215,11 @@ void NRF24L01_PowerDown_Mode(void)
 
 u8 NRF24L01_Handshake(void)
 {
+	u8 sta;
 	u8 NRF_status = 0;
-	u8 Tx_buf[TX_PLOAD_WIDTH];
-	u8 Rx_buf[RX_PLOAD_WIDTH];
+	u8 Tx_status = 0;
+	u8 Tx_buf[TX_PLOAD_WIDTH]={0};
+	u8 Rx_buf[RX_PLOAD_WIDTH]={0};
 	u8 i = 0;
 	if( NRF24L01_Check() == 1 )						  //没有检测到NRF24L01的存在
 	{
@@ -232,38 +230,45 @@ u8 NRF24L01_Handshake(void)
 		NRF_status |= NRF_ON;
 		//发送握手信号，等待握手信号接收，如果接收握手码正确，则NRF_OK;
 		NRF24L01_PowerDown_Mode();
+		delay_ms(2);
 		NRF24L01_TX_Mode();
+		delay_ms(2);
+		
 		Tx_buf[0] =0xaa;
-		if( NRF24L01_TxPacket(Tx_buf) == TX_OK )
+		Tx_status = NRF24L01_TxPacket(Tx_buf);
+		NRF24L01_PowerDown_Mode();
+		NRF24L01_RX_Mode();
+		do
 		{
-			NRF24L01_PowerDown_Mode();
-			NRF24L01_RX_Mode();
-
-			while( NRF24L01_RxPacket(Rx_buf) )
+			sta = NRF24L01_Read_Reg(STATUS);
+			i++;
+			if( i == 255) 												 //如果255次循环后，还没有能接收到握手码，则说明NRF没有连接
 			{
-				i++;
-				delay_ms(2);
-				if( i == 255) 												 //如果255次循环后，还没有能接收到握手码，则说明NRF没有连接
-				{
-					NRF_status &= NRF_DISCONNECTED;  
-					break;
-				}
-			}
-			if( i < 255 )
-			{
-				if( ( Rx_buf[0] + 0xaa ) == 0xff )			//如果接收到的握手码与发送的握手码相加等于0xff，说明握手正确，通讯正常；			
-				{
-					NRF_status |= NRF_CONNECTED;
-				}
-				else
-				{
-					NRF_status &= NRF_DISCONNECTED;  
-				}
+				NRF_status &= NRF_DISCONNECTED;  
+				break;
 			}
 		}
+		while(( sta & RX_OK ) == 0 );  
+
+		delay_ms(2);
+		NRF24L01_Write_Reg(NRF_WRITE_REG+STATUS,sta); 					//清除TX_DS或MAX_RT中断标志
+		NRF24L01_Read_Buf(RD_RX_PLOAD,Rx_buf,RX_PLOAD_WIDTH);			//读取数据
+		NRF24L01_Write_Reg(FLUSH_RX,0xff);								//清除RX FIFO寄存器
+		if( i < 255 )
+		{
+			if(  Rx_buf[0] == 2 )										//如果接收到的握手码与发送的握手码相加等于0xff，说明握手正确，通讯正常；			
+			{
+				NRF_status |= NRF_CONNECTED;
+			}
+			else
+			{
+				NRF_status &= NRF_DISCONNECTED;  
+			}
+		}
+		
 		else
 		{
-			NRF_status &= NRF_OFF;  
+			NRF_status &= NRF_DISCONNECTED;  
 		}
 
 	}
