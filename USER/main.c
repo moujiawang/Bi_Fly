@@ -22,7 +22,7 @@ volatile uint8_t Receive_Wrong_flag = 0;
 volatile uint8_t Do_Flag = 0;											//while loop time control flag，when Do_flag = 0，while loop can execute
 
 u16 T = 0;
-u16 t=0;	
+//u16 t=0;	
 u8 Rx_buf[RX_PLOAD_WIDTH] = {0};
 u8 Tx_buf[TX_PLOAD_WIDTH] = {0};
 u8 RX_Result;
@@ -37,7 +37,8 @@ SYS_STATUS SYS_status;
 
 int main(void)
 {
-//	u8 i = 0;
+	u8 sta_tmp = 0;
+	u8 rx_len = 0;
 	delay_init();
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);	
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
@@ -45,17 +46,37 @@ int main(void)
 	motor_init();																	//电机控制定时器初始化
 	TIM_Cmd(TIM2, ENABLE);															//使能TIM2
 	TIM_Cmd(TIM3, ENABLE);															//使能TIM3
-	NRF24L01_Init();    															//初始化NRF24L01 
-/*	load_config();  																//从flash中读取配置信息 -->eeprom.c
+	NRF24L01_Init(TX_MODE);    														//初始化NRF24L01为发送模式    
+	load_config();  																//从flash中读取配置信息 -->eeprom.c
 	Initial_UART1(115200L);															//初始化串口
 	////////////////IMU/////////////////
-	imu_fusion_init(&imu_fusion_module);*/
+	imu_fusion_init(&imu_fusion_module);
 	////////////////////////////////////
+	while( NRF24L01_Check() == 1);
+	SYS_status.DTU_NRF_Status |= NRF_ON;											//有NRF在线,更新标志位
+	
 	do
 	{
-		SYS_status.DTU_NRF_Status = NRF24L01_Handshake();							//握手，并更新NRF的在线通讯状态值，同时将模式值设为0
+		NRF24L01_FlushTX();
+		Command_patch(Tx_buf,&PID_paras, &Actuator_Status, &imu_fusion_module);		//更新Tx_buf
+		sta_tmp = NRF24L01_TxPacket(Tx_buf);
+		if( sta_tmp == TX_OK )
+		{
+			rx_len = NRF24L01_Read_Reg(R_RX_PL_WID);								//读取接收到的数据长度
+			if((rx_len > 0)&& (rx_len < 33))
+			{
+				NRF24L01_Read_Buf(RD_RX_PLOAD,Rx_buf,rx_len);						//读取数据
+				if(Rx_buf[0] == 2)
+				{
+					SYS_status.DTU_NRF_Status |= NRF_CONNECTED;						//NRF通讯正常，更新标志位
+					break;
+				}
+				
+			}
+		}
+		SYS_status.DTU_NRF_Status &= NRF_DISCONNECTED;								//NRF通讯不正常，更新标志位
 	}
-	while( (SYS_status.DTU_NRF_Status & 0x02) == 0x00 );							//直至握手成功
+	while(1);																		//直至握手成功后，退出循环
 	
 /*	while(Receive_complete_flag == 0 )												//等待DTU第一次握手
 	{
@@ -82,17 +103,17 @@ int main(void)
 */
 	while(1)
 	{
-		if( NRF24L01_RxPacket(Rx_buf) == 0 )
-		{
-			Command_dispatch(Rx_buf, &Actuator_Status, &Motion_Status, &PID_paras);
-			switch(Mode_ID)
-			{
-				case 0x20:Actuator_command(&Actuator_Status);break;
-				case 0x2f:Motion_command(&Motion_Status);break;
-				case 0x30:PID_command(&PID_paras);break;
-				defualt:;
-			}
-		};
+//		if( NRF24L01_RxPacket(Rx_buf) == 0 )
+//		{
+//			Command_dispatch(Rx_buf, &Actuator_Status, &Motion_Status, &PID_paras);
+//			switch(Mode_ID)
+//			{
+//				case 0x20:Actuator_command(&Actuator_Status);break;
+//				case 0x2f:Motion_command(&Motion_Status);break;
+//				case 0x30:PID_command(&PID_paras);break;
+//				defualt:;
+//			}
+//		};
 		
 
 /*		if(Do_Flag == 0)
