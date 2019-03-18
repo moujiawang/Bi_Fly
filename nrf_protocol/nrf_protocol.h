@@ -99,12 +99,13 @@ typedef struct
 
 
 //模式标志号
-#define ACTUATOR_MODE 0x20
-#define MOTION_MODE   0x2f
-#define PID_MODE      0x30
+#define ACTUATOR_MODE 0x00
+#define MOTION_MODE   0x01
+#define PID_MODE      0x02
+#define START_MODE    0xAA
 
 u8 Command_dispatch(u8 *rx_buff, ACTUATOR_STATUS *Actuator_status, MOTION_STATUS *Motion_status, PID_PARAS *PID_paras);
-void Command_patch(u8 *tx_buff, PID_PARAS *PID_paras, ACTUATOR_STATUS* Actuator_Status, IMUFusion* Attitude);
+void Command_patch(u8 *tx_buff, PID_PARAS *PID_paras, ACTUATOR_STATUS* Actuator_Status, IMUFusion* Attitude, u8 mode_id);
 void Actuator_assignment(const u8 *rx_buff, ACTUATOR_STATUS *Actuator_status);
 void Motion_assignment(const u8 *rx_buff, MOTION_STATUS *Motion_status);
 void PID_assignment(const u8 *rx_buff, PID_PARAS *PID_paras);

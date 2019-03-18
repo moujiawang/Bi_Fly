@@ -37,8 +37,6 @@ SYS_STATUS SYS_status;
 
 int main(void)
 {
-	u8 sta_tmp = 0;
-	u8 rx_len = 0;
 	delay_init();
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);	
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
@@ -55,29 +53,25 @@ int main(void)
 	while( NRF24L01_Check() == 1);
 	SYS_status.DTU_NRF_Status |= NRF_ON;											//有NRF在线,更新标志位
 	
+	Command_patch(Tx_buf, &PID_paras, &Actuator_Status, &imu_fusion_module, START_MODE);		//更新Tx_buf
 	do
 	{
-		NRF24L01_FlushTX();
-		Command_patch(Tx_buf,&PID_paras, &Actuator_Status, &imu_fusion_module);		//更新Tx_buf
-		sta_tmp = NRF24L01_TxPacket(Tx_buf);
-		if( sta_tmp == TX_OK )
-		{
-			rx_len = NRF24L01_Read_Reg(R_RX_PL_WID);								//读取接收到的数据长度
-			if((rx_len > 0)&& (rx_len < 33))
-			{
-				NRF24L01_Read_Buf(RD_RX_PLOAD,Rx_buf,rx_len);						//读取数据
-				if(Rx_buf[0] == 2)
-				{
-					SYS_status.DTU_NRF_Status |= NRF_CONNECTED;						//NRF通讯正常，更新标志位
-					break;
-				}
-				
-			}
-		}
-		SYS_status.DTU_NRF_Status &= NRF_DISCONNECTED;								//NRF通讯不正常，更新标志位
+		SYS_status.DTU_NRF_Status |= NRF24L01_shakehand(Tx_buf, Rx_buf);			//更新此时NRF24L01通讯状态量
 	}
-	while(1);																		//直至握手成功后，退出循环
+	while((SYS_status.DTU_NRF_Status & 0x03) ！= 0x03);								//只有当NRF24L01在线并且通讯正常时才会跳过次循环																		//直至握手成功后，退出循环
+	SYS_status.DTU_NRF_Status = (SYS_status.DTU_NRF_Status & 0xc7)|(Rx_buf[1]<<3);	//根据握手信号回传的信息，更新模式信息
 	
+	switch(Rx_buf[1])
+	{
+		case ACTUATOR_MODE:
+		{	
+			Command_patch(Tx_buf, &PID_paras, &Actuator_Status, &imu_fusion_module, ACTUATOR_MODE);
+			Actuator_command(&Actuator_Status);
+
+		};break;
+		case MOTION_MODE  :Motion_command(&Motion_Status);break;
+		case PID_MODE     :PID_command(&PID_paras);break;
+	}
 /*	while(Receive_complete_flag == 0 )												//等待DTU第一次握手
 	{
 		i++;

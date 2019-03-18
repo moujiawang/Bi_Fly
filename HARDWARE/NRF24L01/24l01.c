@@ -243,3 +243,41 @@ void NRF24L01_ACK_W_Packet(u8 *Data,u8 Data_Length)
 
 	NRF24L01_Write_Buf(W_ACK_PAYLOAD,Data,Data_Length);					//向管道0写入W_ACK_PAYLOAD命令,并读取数据
 }
+
+/*===========================================================================
+* 函数 ： NRF24L01_shakehand(u8 tx_buf, u8 rx_buf) => 进行握手通讯                                     * 
+* 输入 ： u8 *tx_buf, u8 *rx_buf，分别对应系统变量中Tx_Buf和Rx_Buf；执行程序后，
+		  Rx_Buf会被更新				
+* 说明 ：此函数是在通讯前进行的铜须测试函数，机载下位机发送当前的状态量给上位机，上位机
+		接收到信息后，发送一个握手码，如果本机（机载下位机）接收到握手码正确，则认为通
+		迅成功；可以进行后续通讯，这个函数在程序调试期主要用于调试用；
+============================================================================*/
+u8 NRF24L01_shakehand(u8 *tx_buf, u8 *rx_buf)
+{
+	u8 sta_tmp = 0;
+	u8 rx_len = 0;
+	NRF24L01_FlushTX();
+	sta_tmp = NRF24L01_TxPacket(tx_buf);
+	if( sta_tmp == TX_OK )
+	{
+		rx_len = NRF24L01_Read_Reg(R_RX_PL_WID);						//读取接收到的数据长度
+		if((rx_len > 0)&& (rx_len < 33))
+		{
+			NRF24L01_Read_Buf(RD_RX_PLOAD,rx_buf,rx_len);				//读取数据
+			if(rx_buf[0] == 0xAA)										//如果收到的握手码是2，则说明通讯成功
+			{
+				
+				if( (rx_buf[1] == ACTUATOR_MODE) ||
+					(rx_buf[1] == ACTUATOR_MODE) ||	
+					(rx_buf[1] == ACTUATOR_MODE)  )
+				{
+					return  NRF_CONNECTED;									//NRF通讯正常，更新标志位
+				}
+				
+				
+			}
+		}
+	}
+	return  NRF_DISCONNECTED;											//NRF通讯不正常，更新标志位
+
+}

@@ -171,7 +171,7 @@ void NRF24L01_FlushTX(void);					//复位TX FIFO指针
 void NRF24L01_FlushRX(void);					//复位RX FIFO指针
 void NRF24L01_SetTRMode(NRF24L01_MODE mode);	//设置收发模式	
 void NRF24L01_ACK_W_Packet(u8 *Data,u8 Data_Length);			//将自动应答的payload写入TX FIFO
-
+u8 NRF24L01_shakehand(u8 tx_buf, u8 rx_buf);    //握手函数     
 #endif
 
 

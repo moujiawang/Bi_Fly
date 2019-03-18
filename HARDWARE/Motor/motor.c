@@ -237,6 +237,7 @@ void Command_manage(int32_t Command_length[],ACTUATOR_STATUS* Actuator_Status)
 void Actuator_command(const ACTUATOR_STATUS* Actuator_Status)
 {
 	TIM_OCInitTypeDef TIM_OCInitStruct;
+	
 	if( Actuator_Status->Fly_Pulse > 3 )
 	{
 		TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
