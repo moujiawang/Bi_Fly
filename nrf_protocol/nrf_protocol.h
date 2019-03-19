@@ -6,7 +6,7 @@
 
 typedef struct
 {
-    float q0;
+    float q0;						//q0-q3å››å…ƒæ•°
     float q1;
     float q2;
     float q3;
@@ -74,7 +74,7 @@ typedef struct
 
 typedef struct
 {
-	u8 PID_ID;
+	PID_ID PID_id;
 	PID_PARA PID_Yaw_para;		
 	PID_PARA PID_Pitch_para;
 	PID_PARA PID_Roll_para;
@@ -87,24 +87,32 @@ typedef struct
 }SYS_STATUS;
 
 
-//NRF24L01 ºÍ ½ÓÊÕ»úÊÇ·ñÔÚÏß±êÖ¾ºÅ
+//NRF24L01 å’Œ æŽ¥æ”¶æœºæ˜¯å¦åœ¨çº¿æ ‡å¿—å·
 
-#define NRF_ON            0x01					//NRFÔÚÏß£¬±íÃ÷·ÉÐÐÆ÷¶ËÓÐ¿ÉÒÔÓëÖ÷¿ØÐ¾½øÐÐÍ¨Ñ¶µÄNRFÄ£¿é
-#define NRF_OFF           0xfe					//NRF²»ÔÚÏß
+#define NRF_ON            0x01					//NRFåœ¨çº¿ï¼Œè¡¨æ˜Žé£žè¡Œå™¨ç«¯æœ‰å¯ä»¥ä¸Žä¸»æŽ§èŠ¯è¿›è¡Œé€šè®¯çš„NRFæ¨¡å—
+#define NRF_OFF           0xfe					//NRFä¸åœ¨çº¿
 
-//NRF24L01 ºÍ ½ÓÊÕ»úÍ¨Ñ¶±êÖ¾ºÅ
+//NRF24L01å’ŒæŽ¥æ”¶æœºé€šè®¯æ ‡å¿—å·
 #define NRF_CONNECTED     0x02	
-#define NRF_DISCONNECTED  0xFD					//NRFÍ¨Ñ¶Ê§°Ü
-#define DTU_OK            0x03					//DTU½ÓÊÕ»úÍ¨Ñ¶Õý³£¾Í±íÃ÷ÔÚÏß£¬DTUÎÞÊÇ·ñÔÚÏßµÄ¼ì²â±êÖ¾Î»
+#define NRF_DISCONNECTED  0xFD					//NRFé€šè®¯å¤±è´¥
+#define DTU_OK            0x03					//DTUæŽ¥æ”¶æœºé€šè®¯æ­£å¸¸å°±è¡¨æ˜Žåœ¨çº¿ï¼ŒDTUæ— æ˜¯å¦åœ¨çº¿çš„æ£€æµ‹æ ‡å¿—ä½
 
 
-//Ä£Ê½±êÖ¾ºÅ
-#define ACTUATOR_MODE 0x00
-#define MOTION_MODE   0x01
-#define PID_MODE      0x02
-#define START_MODE    0xAA
+//æ¨¡å¼æ ‡å¿—å·
+#define START_MODE    0x00						//0000 0000
+#define MOTION_MODE   0x08						//0000 1000
+#define PID_MODE      0x10						//0001 0000
+#define ACTUATOR_MODE 0x18						//0001 1000
+#define FAULT_MODE    0x38						//0011 1000
+ 
 
-u8 Command_dispatch(u8 *rx_buff, ACTUATOR_STATUS *Actuator_status, MOTION_STATUS *Motion_status, PID_PARAS *PID_paras);
+#define MODE_STATUS (SYS_status.DTU_NRF_Status|0x38)
+
+typedef enum{ TX_MODE, RX_MODE } NRF24L01_MODE; 		//TX_MODE->0,RX_MODE->1
+typedef enum{ PID_YAW, PID_PITCH,PID_ROLL } PID_ID;     //PID_YAW->0, PID_PITCH->1,PID_ROLL->2
+typedef enum{ TX_WAIT, TX_GO } TX_FLAG;					//Tx_Flag
+
+u8 Command_dispatch(u8 *rx_buff, ACTUATOR_STATUS *Actuator_status, MOTION_STATUS *Motion_status, PID_PARAS *PID_parasï¼ŒSYS_STATUS *SYS_status);
 void Command_patch(u8 *tx_buff, PID_PARAS *PID_paras, ACTUATOR_STATUS* Actuator_Status, IMUFusion* Attitude, u8 mode_id);
 void Actuator_assignment(const u8 *rx_buff, ACTUATOR_STATUS *Actuator_status);
 void Motion_assignment(const u8 *rx_buff, MOTION_STATUS *Motion_status);

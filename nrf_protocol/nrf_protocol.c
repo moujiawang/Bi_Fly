@@ -37,65 +37,74 @@ void Motion_assignment(const u8 *rx_buff, MOTION_STATUS *Motion_status)
 
 void PID_assignment(const u8 *rx_buff, PID_PARAS *PID_paras)
 {
-	PID_paras->PID_ID = *rx_buff;
-	switch (PID_paras->PID_ID)
+	PID_paras->PID_id = *rx_buff;//更新PID_id的值
+	switch (PID_paras->PID_id)
 	{
-	case 0x01:
-	{
-		PID_paras->PID_Yaw_para.Kp_Int = *(rx_buff + 1);
-		PID_paras->PID_Yaw_para.Ki_Int = *(rx_buff + 2);
-		PID_paras->PID_Yaw_para.Kd_Int = *(rx_buff + 3);
-		PID_paras->PID_Yaw_para.Kp_Ext = *(rx_buff + 4);
-		PID_paras->PID_Yaw_para.Ki_Ext = *(rx_buff + 5);
-		PID_paras->PID_Yaw_para.Kd_Ext = *(rx_buff + 6);
-		PID_paras->PID_Yaw_para.SetPoint_Ext = *(int16_t *)&rx_buff[7];
-	};
-	break;
-	case 0x02:
-	{
-		PID_paras->PID_Pitch_para.Kp_Int = *(rx_buff + 1);
-		PID_paras->PID_Pitch_para.Ki_Int = *(rx_buff + 2);
-		PID_paras->PID_Pitch_para.Kd_Int = *(rx_buff + 3);
-		PID_paras->PID_Pitch_para.Kp_Ext = *(rx_buff + 4);
-		PID_paras->PID_Pitch_para.Ki_Ext = *(rx_buff + 5);
-		PID_paras->PID_Pitch_para.Kd_Ext = *(rx_buff + 6);
-		PID_paras->PID_Pitch_para.SetPoint_Ext = *(int16_t *)&rx_buff[7];
-	};
-	break;
-	case 0x03:
-	{
-		PID_paras->PID_Roll_para.Kp_Int = *(rx_buff + 1);
-		PID_paras->PID_Roll_para.Ki_Int = *(rx_buff + 2);
-		PID_paras->PID_Roll_para.Kd_Int = *(rx_buff + 3);
-		PID_paras->PID_Roll_para.Kp_Ext = *(rx_buff + 4);
-		PID_paras->PID_Roll_para.Ki_Ext = *(rx_buff + 5);
-		PID_paras->PID_Roll_para.Kd_Ext = *(rx_buff + 6);
-		PID_paras->PID_Roll_para.SetPoint_Ext = *(int16_t *)&rx_buff[7];
-	};
-	break;
-	defualt:;
+		case PID_YAW:
+		{
+			PID_paras->PID_Yaw_para.Kp_Int = *(rx_buff + 1);
+			PID_paras->PID_Yaw_para.Ki_Int = *(rx_buff + 2);
+			PID_paras->PID_Yaw_para.Kd_Int = *(rx_buff + 3);
+			PID_paras->PID_Yaw_para.Kp_Ext = *(rx_buff + 4);
+			PID_paras->PID_Yaw_para.Ki_Ext = *(rx_buff + 5);
+			PID_paras->PID_Yaw_para.Kd_Ext = *(rx_buff + 6);
+			PID_paras->PID_Yaw_para.SetPoint_Ext = *(int16_t *)&rx_buff[7];
+		};
+		break;
+		case PID_PITCH:
+		{
+			PID_paras->PID_Pitch_para.Kp_Int = *(rx_buff + 1);
+			PID_paras->PID_Pitch_para.Ki_Int = *(rx_buff + 2);
+			PID_paras->PID_Pitch_para.Kd_Int = *(rx_buff + 3);
+			PID_paras->PID_Pitch_para.Kp_Ext = *(rx_buff + 4);
+			PID_paras->PID_Pitch_para.Ki_Ext = *(rx_buff + 5);
+			PID_paras->PID_Pitch_para.Kd_Ext = *(rx_buff + 6);
+			PID_paras->PID_Pitch_para.SetPoint_Ext = *(int16_t *)&rx_buff[7];
+		};
+		break;
+		case PID_ROLL:
+		{
+			PID_paras->PID_Roll_para.Kp_Int = *(rx_buff + 1);
+			PID_paras->PID_Roll_para.Ki_Int = *(rx_buff + 2);
+			PID_paras->PID_Roll_para.Kd_Int = *(rx_buff + 3);
+			PID_paras->PID_Roll_para.Kp_Ext = *(rx_buff + 4);
+			PID_paras->PID_Roll_para.Ki_Ext = *(rx_buff + 5);
+			PID_paras->PID_Roll_para.Kd_Ext = *(rx_buff + 6);
+			PID_paras->PID_Roll_para.SetPoint_Ext = *(int16_t *)&rx_buff[7];
+		};
 		break;
 	}
 }
+/*===========================================================================
+* 函数 ：START_assignment(const u8 *rx_buff, SYS_STATUS *SYS_status)                                    * 
+* 输入 ：const u8 *rx_buff, SYS_STATUS *SYS_status
+* 返回 ：无；		  				
+* 说明 ：此函数是在START MODE下的解包函数；主要是实现更新当前模式的功能；
+============================================================================*/
+void START_assignment(const u8 *rx_buff, SYS_STATUS *SYS_status)
+{
+	SYS_Status.DTU_NRF_Status = (SYS_Status.DTU_NRF_Status & 0xc7)|rx_buff[1];		//更新模式信息
+}
 
-u8 Command_dispatch(u8 *rx_buff, ACTUATOR_STATUS *Actuator_status, MOTION_STATUS *Motion_status, PID_PARAS *PID_paras)
+
+u8 Command_dispatch(u8 *rx_buff, ACTUATOR_STATUS *Actuator_status, MOTION_STATUS *Motion_status, PID_PARAS *PID_paras，SYS_STATUS *SYS_status)
 {
 	uint16_t Mode_ID = *rx_buff;
 	switch (Mode_ID)
 	{
-	case 0xa0:
-		Actuator_assignment(rx_buff + 1, Actuator_status);
-		break;
-	case 0xa1:
-		Motion_assignment(rx_buff + 1, Motion_status);
-		break;
-	case 0xa2:
-		PID_assignment(rx_buff + 1, PID_paras);
-		break;
-	default:
-		return 0xaa;
+		case ACTUATOR_MODE:
+			Actuator_assignment(rx_buff + 1, Actuator_status);
+			break;
+		case MOTION_MODE:
+			Motion_assignment(rx_buff + 1, Motion_status);
+			break;
+		case PID_MODE:
+			PID_assignment(rx_buff + 1, PID_paras);
+			break;
+		case START_MODE:
+			START_assignment(rx_buff + 1, SYS_Status);
+			break;
 	}
-
 	return Mode_ID;
 }
 
@@ -137,9 +146,9 @@ void Command_patch(u8 *tx_buff, PID_PARAS *PID_paras, ACTUATOR_STATUS *Actuator_
 		*(tx_buff + 4) = Actuator_Status->Roll_Pulse;
 		*(tx_buff + 5) = Actuator_Status->Yaw_Pulse;
 
-		*(u16 *)&tx_buff[6] = PID_paras->PID_Yaw_para.Kp_Int;
-		*(u16 *)&tx_buff[8] = PID_paras->PID_Yaw_para.Kp_Int;
-		*(u16 *)&tx_buff[10] = PID_paras->PID_Yaw_para.Kp_Int;
+		*(u16 *)&tx_buff[6]  = 0;
+		*(u16 *)&tx_buff[8]  = 0;
+		*(u16 *)&tx_buff[10] = 0;
 		*(u16 *)&tx_buff[12] = (u16)((Attitude->ypr[0]) * 100);
 		*(u16 *)&tx_buff[14] = (u16)((Attitude->ypr[1]) * 100);
 		*(u16 *)&tx_buff[16] = (u16)((Attitude->ypr[2]) * 100);

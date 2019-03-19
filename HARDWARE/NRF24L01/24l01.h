@@ -154,7 +154,7 @@
 #define TX_PLOAD_WIDTH  32  	//32字节的用户数据宽度
 #define RX_PLOAD_WIDTH  32 		//32字节的用户数据宽度
 
-typedef enum{ TX_MODE, RX_MODE } NRF24L01_MODE; 		//TX_MODE->0,RX_MODE->1
+
 
 									   	   
 
@@ -170,9 +170,21 @@ void NRF24L01_PowerDown_Mode(void);				//配置为power down模式
 void NRF24L01_FlushTX(void);					//复位TX FIFO指针
 void NRF24L01_FlushRX(void);					//复位RX FIFO指针
 void NRF24L01_SetTRMode(NRF24L01_MODE mode);	//设置收发模式	
-void NRF24L01_ACK_W_Packet(u8 *Data,u8 Data_Length);			//将自动应答的payload写入TX FIFO
-u8 NRF24L01_shakehand(u8 tx_buf, u8 rx_buf);    //握手函数     
+void NRF24L01_ACK_W_Packet(u8 *Data,u8 Data_Length);   //将自动应答的payload写入TX FIFO
+u8 NRF24L01_Tx_ACKwithpayload(u8 *tx_buf, u8 *rx_buf); //完成一次TX，并且读出一次接收到的应答信息，更新到Rx_buf里面 
+
 #endif
+
+
+
+
+
+
+
+
+
+
+
 
 
 

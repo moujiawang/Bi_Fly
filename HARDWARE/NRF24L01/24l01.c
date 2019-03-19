@@ -245,14 +245,14 @@ void NRF24L01_ACK_W_Packet(u8 *Data,u8 Data_Length)
 }
 
 /*===========================================================================
-* 函数 ： NRF24L01_shakehand(u8 tx_buf, u8 rx_buf) => 进行握手通讯                                     * 
+* 函数 ：NRF24L01_Tx_ACKwithpayload(u8 *tx_buf, u8 *rx_buf)                                     * 
 * 输入 ： u8 *tx_buf, u8 *rx_buf，分别对应系统变量中Tx_Buf和Rx_Buf；执行程序后，
-		  Rx_Buf会被更新				
-* 说明 ：此函数是在通讯前进行的铜须测试函数，机载下位机发送当前的状态量给上位机，上位机
-		接收到信息后，发送一个握手码，如果本机（机载下位机）接收到握手码正确，则认为通
-		迅成功；可以进行后续通讯，这个函数在程序调试期主要用于调试用；
+		  Rx_Buf会被更新
+* 返回 ：通讯正常：返回接收到的数据长度；通讯失败：返回0x00;		  				
+* 说明 ：此函数是在ACK with payload 模式 + DPL(动态数据长度)模式下，发送方发送一次
+		数据并且接受应答消息的函数
 ============================================================================*/
-u8 NRF24L01_shakehand(u8 *tx_buf, u8 *rx_buf)
+u8 NRF24L01_Tx_ACKwithpayload(u8 *tx_buf, u8 *rx_buf)
 {
 	u8 sta_tmp = 0;
 	u8 rx_len = 0;
@@ -264,20 +264,27 @@ u8 NRF24L01_shakehand(u8 *tx_buf, u8 *rx_buf)
 		if((rx_len > 0)&& (rx_len < 33))
 		{
 			NRF24L01_Read_Buf(RD_RX_PLOAD,rx_buf,rx_len);				//读取数据
-			if(rx_buf[0] == 0xAA)										//如果收到的握手码是2，则说明通讯成功
-			{
-				
-				if( (rx_buf[1] == ACTUATOR_MODE) ||
-					(rx_buf[1] == ACTUATOR_MODE) ||	
-					(rx_buf[1] == ACTUATOR_MODE)  )
-				{
-					return  NRF_CONNECTED;									//NRF通讯正常，更新标志位
-				}
-				
-				
-			}
+			NRF24L01_FlushRX();											//清除RX_FIFIO
+			return  rx_len;												//NRF通讯正常，返回接受到的数据长度
 		}
 	}
-	return  NRF_DISCONNECTED;											//NRF通讯不正常，更新标志位
+	return  0x00;														//NRF通讯不正常，返回0x00
+}
 
+void Fault_command(SYS_STATUS *SYS_Status)
+{
+	u8 rx_len = 0;
+	while(NRF24L01_Check());
+	Command_patch(Tx_buf, &PID_Paras, &Actuator_Status, &imu_fusion_module, START_MODE);		//更新Tx_buf
+	do
+	{
+		rx_len = NRF24L01_Tx_ACKwithpayload(Tx_buf, Rx_buf);
+		if((rx_len>0)&&(rx_len<33))
+		{
+			SYS_status.DTU_NRF_Status |= NRF_CONNECTED；
+			break;
+		}
+	}
+	while(1);//只有当NRF24L01在线并且通讯正常时才会跳过次循环
+	SYS_Status.DTU_NRF_Status = (SYS_Status.DTU_NRF_Status & 0xc7)|rx_buff[1];
 }

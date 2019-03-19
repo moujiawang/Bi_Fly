@@ -150,8 +150,8 @@ void IMU_init(OrientationEstimator* estimator)
 /**************************实现函数********************************************
 *函数原型:	   void IMU_getValues(float * values)
 *功　　能:	 读取加速度 陀螺仪 磁力计 的当前值  
-输入参数： 将结果存放的数组首地址
-输出参数：没有
+*输入参数： 将结果存放的数组首地址
+*输出参数：没有
 *******************************************************************************/
 void IMU_getValues(float * values) {  
 	int16_t accgyroval[6];
@@ -174,8 +174,8 @@ void IMU_getValues(float * values) {
 /**************************实现函数********************************************
 *函数原型:	   void IMU_AHRSupdate
 *功　　能:	 更新AHRS 更新四元数 
-输入参数： 当前的测量值。
-输出参数：没有
+*输入参数： 当前的测量值。
+*输出参数：没有
 *******************************************************************************/
 #define Kp 2.0f   // proportional gain governs rate of convergence to accelerometer/magnetometer
 #define Ki 0.01f   // integral gain governs rate of convergence of gyroscope biases
@@ -289,7 +289,7 @@ if(ex != 0.0f && ey != 0.0f && ez != 0.0f){
 
 void IMU_getQ(OrientationEstimator* estimator, float * q) {
 float mygetqval[9];	//用于存放传感器转换结果的数组
-  IMU_getValues(mygetqval);	 
+IMU_getValues(mygetqval);	 
   //将陀螺仪的测量值转成弧度每秒
   //加速度和磁力计保持 ADC值　不需要转换
 IMU_AHRSupdate(estimator, 
