@@ -274,8 +274,8 @@ u8 NRF24L01_Tx_ACKwithpayload(u8 *tx_buf, u8 *rx_buf)
 void Fault_command(SYS_STATUS *SYS_Status)
 {
 	u8 rx_len = 0;
-	while(NRF24L01_Check());
-	Command_patch(Tx_buf, &PID_Paras, &Actuator_Status, &imu_fusion_module, START_MODE);		//更新Tx_buf
+	while(NRF24L01_Check());	
+	Command_patch(Tx_buf, &SYS_Status, START_MODE);		//更新Tx_buf
 	do
 	{
 		rx_len = NRF24L01_Tx_ACKwithpayload(Tx_buf, Rx_buf);

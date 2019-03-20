@@ -173,6 +173,7 @@ void NRF24L01_SetTRMode(NRF24L01_MODE mode);	//设置收发模式
 void NRF24L01_ACK_W_Packet(u8 *Data,u8 Data_Length);   //将自动应答的payload写入TX FIFO
 u8 NRF24L01_Tx_ACKwithpayload(u8 *tx_buf, u8 *rx_buf); //完成一次TX，并且读出一次接收到的应答信息，更新到Rx_buf里面 
 
+void Fault_command(SYS_STATUS *SYS_Status);
 #endif
 
 

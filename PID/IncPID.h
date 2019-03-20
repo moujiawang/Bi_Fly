@@ -8,7 +8,7 @@
 
 
 void IncPID_Init(PID_PARAS *PID_paras);
-uint16_t IncPID_Cal(PID_PARA *PID_para, float Angle_ActualVal, float rad_ActualVal);
+uint16_t IncPID_Cal(PID_PARA *PID_para, IMUFusion *Attitude,YPR_ID YPR_id);
 
 #endif
 
