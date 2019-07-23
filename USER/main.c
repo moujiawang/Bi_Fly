@@ -1,12 +1,12 @@
 #include "stm32f10x.h"
 #include "delay.h"
+#include "nrf_protocol.h"
 #include "DTU.h"
 #include "motor.h"
 #include "24l01.h" 	
 #include <stdlib.h>
 #include <string.h>
 #include "upload_state_machine.h"
-#include "nrf_protocol.h"
 #include "IncPID.h"
 
 
@@ -19,7 +19,8 @@ volatile uint8_t Update_Num = 0;
 volatile uint8_t Channel_status = End;
 volatile uint8_t Receive_complete_flag = 0;
 volatile uint8_t Receive_Wrong_flag = 0;
-volatile uint8_t Do_Flag = 0;											//while loop time control flag，when Do_flag = 0，while loop can execute
+//while loop time control flag，when Do_flag = 0，while loop can execute
+volatile uint8_t Do_Flag = 0;											
 
 
 u16 T = 0;
@@ -29,13 +30,16 @@ u8 Tx_buf[TX_PLOAD_WIDTH] = {0};
 u8 RX_Result;
 u8 TX_Result;
 u8 Mode_ID;
+<<<<<<< HEAD
 TX_FLAG Tx_Flag = TX_WAIT;		
+=======
+TX_FLAG Tx_Flag = 0;	
 
-IMUFusion imu_fusion_module;
-ACTUATOR_STATUS Actuator_Status;
-MOTION_STATUS Motion_Status;
-PID_PARAS PID_Paras;
-SYS_STATUS SYS_Status; 
+//系统的状态量
+SYS_STATUS SYS_Status; 	
+>>>>>>> 67753ccbe8b87348627ef750ab8053a7a981ca88
+
+#define MODE_STATUS (SYS_Status.DTU_NRF_Status|0x38)
 
 #define MODE_STATUS (SYS_Status.DTU_NRF_Status|0x38)
 
@@ -55,14 +59,14 @@ int main(void)
 	NRF24L01_Init(TX_MODE);    														//初始化NRF24L01为发送模式    
 	load_config();  																//从flash中读取配置信息 -->eeprom.c
 	Initial_UART1(115200L);															//初始化串口
-	IncPID_Init(&PID_Paras);														//初始化PID参数
+	IncPID_Init(&SYS_Status.PID_Paras);												//初始化PID参数
 	////////////////IMU/////////////////
-	imu_fusion_init(&imu_fusion_module);
+	imu_fusion_init(&SYS_Status.imu_fusion_module);
 	////////////////////////////////////
 	while( NRF24L01_Check() == 1);
 	SYS_Status.DTU_NRF_Status |= NRF_ON;											//有NRF在线,更新标志位
 	
-	Command_patch(Tx_buf, &PID_Paras, &Actuator_Status, &imu_fusion_module, START_MODE);		//更新Tx_buf
+	Command_patch(Tx_buf, &SYS_Status, START_MODE);		//更新Tx_buf
 	do
 	{
 		rx_len = NRF24L01_Tx_ACKwithpayload(Tx_buf, Rx_buf);
@@ -102,17 +106,25 @@ int main(void)
 	while(1)
 	{
 		//////////////////IMU////////////////////
-		imu_fusion_do_run(&imu_fusion_module);
+		imu_fusion_do_run(&SYS_Status.imu_fusion_module);
 		/////////////////////////////////////////
 		if(Tx_Flag == TX_GO)
 		{
+<<<<<<< HEAD
 			Command_patch(Tx_buf, &PID_Paras, &Actuator_Status, &imu_fusion_module, MODE_STATUS);		//打包数据，更新Tx_buf，准备发送
+=======
+			Command_patch(Tx_buf, &SYS_Status, MODE_STATUS);		//打包数据，更新Tx_buf，准备发送
+>>>>>>> 67753ccbe8b87348627ef750ab8053a7a981ca88
 			rx_len = NRF24L01_Tx_ACKwithpayload(Tx_buf, Rx_buf);
 			if((rx_len>0)&&(rx_len<33))
 			{	
 				//刷新状态标志和模式信息
 				SYS_Status.DTU_NRF_Status |= NRF_CONNECTED;
+<<<<<<< HEAD
 				Command_dispatch(Rx_buf, &Actuator_Status, &Motion_Status, &PID_Paras,&SYS_Status);
+=======
+				Command_dispatch(Rx_buf,&SYS_Status);
+>>>>>>> 67753ccbe8b87348627ef750ab8053a7a981ca88
 			}
 			else
 			{
@@ -123,6 +135,7 @@ int main(void)
 					SYS_Status.DTU_NRF_Status |= FAULT_MODE;
 				}
 			}
+																
 		}
 		switch(MODE_STATUS)
 		{
@@ -130,6 +143,7 @@ int main(void)
 			{
 				//init_motor();
 			};break;
+<<<<<<< HEAD
 			case ACTUATOR_MODE:Actuator_command(&Actuator_Status);break;
 			case MOTION_MODE  :Motion_command(&Motion_Status);break;
 			case PID_MODE     :PID_command(&PID_Paras);break;
@@ -153,9 +167,20 @@ int main(void)
 				while(1);//只有当NRF24L01在线并且通讯正常时才会跳过次循环
 				SYS_Status.DTU_NRF_Status = (SYS_Status.DTU_NRF_Status & 0xc7)|Rx_buf[1];
 			};
+=======
+			case ACTUATOR_MODE:
+			{
+				if(Tx_Flag == TX_GO)//有指令刷新时执行一次							
+				{
+					Actuator_command(&SYS_Status.Actuator_Status);break;
+				}
+			}
+			case MOTION_MODE  :Motion_command(&SYS_Status.Motion_Status);break;
+			case PID_MODE     :PID_command(&SYS_Status);break;
+			case FAULT_MODE   :Fault_command(&SYS_Status);break;
+>>>>>>> 67753ccbe8b87348627ef750ab8053a7a981ca88
 		}
-		
-
+		Tx_Flag = TX_WAIT;//复位心跳标志位，等待下次进入	
 		
 
 //		if( NRF24L01_RxPacket(Rx_buf) == 0 )

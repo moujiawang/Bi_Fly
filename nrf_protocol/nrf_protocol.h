@@ -5,8 +5,13 @@
 #include "stm32f10x.h"
 
 typedef enum{ TX_MODE, RX_MODE } NRF24L01_MODE; 		//TX_MODE->0,RX_MODE->1
+<<<<<<< HEAD
 typedef enum{ PID_YAW, PID_PITCH,PID_ROLL } PID_ID;     //PID_YAW->0, PID_PITCH->1,PID_ROLL->2
 typedef enum{ TX_WAIT, TX_GO } TX_FLAG;					//Tx_Flag
+=======
+typedef enum{ TX_WAIT, TX_GO } TX_FLAG;					//Tx_Flag
+typedef enum{ YAW, PITCH, ROLL } YPR_ID;				//YAW->0, PITCH->1,ROLL->2
+>>>>>>> 67753ccbe8b87348627ef750ab8053a7a981ca88
 
 typedef struct
 {
@@ -23,6 +28,7 @@ typedef struct
 {
 	OrientationEstimator estimator;
 	float ypr[3];
+	float ypr_rate[3];
 	uint32_t system_micrsecond;
 	u8 upload_state;
 	int16_t math_hz;
@@ -64,12 +70,12 @@ typedef struct
 	int16_t Error_Ext;				//e[k]
 	int16_t PreError_Ext;			//e[k-1]
 	int16_t LastError_Ext;			//e[k-2]
-	uint8_t Kp_Int;					
-	uint8_t Ki_Int;
-	uint8_t Kd_Int;
-	uint8_t Kp_Ext;
-	uint8_t Ki_Ext;
-	uint8_t Kd_Ext;
+	u8 Kp_Int;					
+	u8 Ki_Int;
+	u8 Kd_Int;
+	u8 Kp_Ext;
+	u8 Ki_Ext;
+	u8 Kd_Ext;
 	int8_t PIDcal_ExtOut;
 	int16_t PIDcal_IntOut;
 	int16_t SetPoint_Int;
@@ -78,16 +84,17 @@ typedef struct
 
 typedef struct
 {
-	PID_ID PID_id;
-	PID_PARA PID_Yaw_para;		
-	PID_PARA PID_Pitch_para;
-	PID_PARA PID_Roll_para;
+	YPR_ID PID_id;
+	PID_PARA PID_YPR_para[3];		
 }PID_PARAS;
 
 typedef struct
 {
 	u8 DTU_NRF_Status;
-	
+	IMUFusion imu_fusion_module;
+	ACTUATOR_STATUS Actuator_Status;
+	MOTION_STATUS Motion_Status;
+	PID_PARAS PID_Paras;
 }SYS_STATUS;
 
 
@@ -110,12 +117,18 @@ typedef struct
 #define FAULT_MODE    0x38						//0011 1000
  
 
+<<<<<<< HEAD
 
 
 
 
 u8 Command_dispatch(u8 *rx_buff, ACTUATOR_STATUS *Actuator_status, MOTION_STATUS *Motion_status, PID_PARAS *PID_paras, SYS_STATUS *SYS_status);
 void Command_patch(u8 *tx_buff, PID_PARAS *PID_paras, ACTUATOR_STATUS* Actuator_Status, IMUFusion* Attitude, u8 mode_id);
+=======
+
+u8 Command_dispatch(u8 *rx_buff, SYS_STATUS *SYS_status);
+void Command_patch(u8 *tx_buff, SYS_STATUS *SYS_status, u8 mode_id);
+>>>>>>> 67753ccbe8b87348627ef750ab8053a7a981ca88
 void Actuator_assignment(const u8 *rx_buff, ACTUATOR_STATUS *Actuator_status);
 void Motion_assignment(const u8 *rx_buff, MOTION_STATUS *Motion_status);
 void PID_assignment(const u8 *rx_buff, PID_PARAS *PID_paras);

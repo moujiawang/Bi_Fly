@@ -3,6 +3,7 @@
 #include "nrf_protocol.h"
 #include "stdlib.h"
 #include "string.h"
+#include "IncPID.h"
 #include "motor.h"
 
 
@@ -234,15 +235,15 @@ void Command_manage(int32_t Command_length[],ACTUATOR_STATUS* Actuator_Status)
 */
 }
 
-void Actuator_command(const ACTUATOR_STATUS* Actuator_Status)
+void Actuator_command(const ACTUATOR_STATUS* Actuator_status)
 {
 	TIM_OCInitTypeDef TIM_OCInitStruct;
 	
-	if( Actuator_Status->Fly_Pulse > 3 )
+	if( Actuator_status->Fly_Pulse > 3 )								 	//拍打电机Enable，并设置占空比
 	{
 		TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
-		if( Actuator_Status->Fly_Pulse <= 100 )
-			TIM_OCInitStruct.TIM_Pulse = Actuator_Status->Fly_Pulse;
+		if( Actuator_status->Fly_Pulse <= 100 )
+			TIM_OCInitStruct.TIM_Pulse = Actuator_status->Fly_Pulse;
 		else
 			TIM_OCInitStruct.TIM_Pulse = 100;
 		TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
@@ -257,11 +258,11 @@ void Actuator_command(const ACTUATOR_STATUS* Actuator_Status)
 		TIM_OCInitStruct.TIM_OutputState = TIM_OutputState_Disable;
 		TIM_OC3Init(TIM3, &TIM_OCInitStruct);
 	}
-	if( Actuator_Status->Climb_Pulse > 3 )
+	if( Actuator_status->Climb_Pulse > 3 )									 //爬行电机Enable，并设置占空比
 	{
 		TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
-		if(Actuator_Status->Climb_Pulse <= 100)
-			TIM_OCInitStruct.TIM_Pulse = Actuator_Status->Climb_Pulse;
+		if(Actuator_status->Climb_Pulse <= 100)
+			TIM_OCInitStruct.TIM_Pulse = Actuator_status->Climb_Pulse;
 		else
 			TIM_OCInitStruct.TIM_Pulse = 100;
 		TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
@@ -276,9 +277,9 @@ void Actuator_command(const ACTUATOR_STATUS* Actuator_Status)
 		TIM_OCInitStruct.TIM_OutputState = TIM_OutputState_Disable;
 		TIM_OC3Init(TIM3, &TIM_OCInitStruct);
 	}
-	TIM_SetCompare2(TIM2,Actuator_Status->Roll_Pulse);						//刷新翻滚控制舵机占空比
-	TIM_SetCompare3(TIM2,Actuator_Status->Pitch_Pulse);						//刷新俯仰控制舵机占空比
-	TIM_SetCompare4(TIM2,Actuator_Status->Yaw_Pulse);						//刷新偏航控制舵机占空比
+	TIM_SetCompare2(TIM2,Actuator_status->Roll_Pulse);						//刷新翻滚控制舵机占空比
+	TIM_SetCompare3(TIM2,Actuator_status->Pitch_Pulse);						//刷新俯仰控制舵机占空比
+	TIM_SetCompare4(TIM2,Actuator_status->Yaw_Pulse);						//刷新偏航控制舵机占空比
 }
 
 void Motion_command(const MOTION_STATUS* Motion_Status)
@@ -286,7 +287,22 @@ void Motion_command(const MOTION_STATUS* Motion_Status)
 	
 }
 
-void PID_command(const PID_PARAS* PID_paras)
+void PID_command(SYS_STATUS *SYS_status)
 {
-	
+	YPR_ID pid_id = 0;
+	uint16_t inc_output = 0;
+	pid_id = SYS_status->PID_Paras.PID_id;      
+	inc_output = IncPID_Cal( &(SYS_status->PID_Paras.PID_YPR_para[pid_id]), &(SYS_status->imu_fusion_module), pid_id);
+	switch(pid_id)
+	{
+		case :;break;
+		case :;break;
+		case :;break;
+		
+	}
+	Actuator_command(&SYS_status->Actuator_Status );
 }
+  
+
+	
+	

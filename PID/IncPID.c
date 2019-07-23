@@ -3,71 +3,49 @@
 
 
 void IncPID_Init(PID_PARAS *PID_paras) 
-{
-    PID_paras->PID_Yaw_para.Error_Int = 0;            	//e[k]
-    PID_paras->PID_Yaw_para.LastError_Int = 0;            //e[k-1]
-	PID_paras->PID_Yaw_para.PreError_Int = 0;             //e[k-2]
-	PID_paras->PID_Yaw_para.Error_Ext = 0;            	//e[k]
-	PID_paras->PID_Yaw_para.LastError_Ext = 0;            //e[k-1]
-	PID_paras->PID_Yaw_para.PreError_Ext = 0;             //e[k-2]
-    PID_paras->PID_Yaw_para.Kp_Int=0;      			//±ÈÀı³£Êı Proportional Const
-    PID_paras->PID_Yaw_para.Ki_Int=0;        		//»ı·Ö³£Êı  Integral Const
-    PID_paras->PID_Yaw_para.Kd_Int=0;      			//Î¢·Ö³£Êı Derivative Const
-	PID_paras->PID_Yaw_para.Kp_Ext=0;      			//±ÈÀı³£Êı Proportional Const
-    PID_paras->PID_Yaw_para.Ki_Ext=0;        		//»ı·Ö³£Êı  Integral Const
-    PID_paras->PID_Yaw_para.Kd_Ext=0;      			//Î¢·Ö³£Êı Derivative Const
-	
-	PID_paras->PID_Pitch_para.Error_Int = 0;            	//e[k]
-    PID_paras->PID_Pitch_para.LastError_Int = 0;          //e[k-1]
-	PID_paras->PID_Pitch_para.PreError_Int = 0;           //e[k-2]
-	PID_paras->PID_Pitch_para.Error_Ext = 0;            	//e[k]
-    PID_paras->PID_Pitch_para.LastError_Ext = 0;          //e[k-1]
-	PID_paras->PID_Pitch_para.PreError_Ext = 0;           //e[k-2]
-    PID_paras->PID_Pitch_para.Kp_Int=0;      		//±ÈÀı³£Êı Proportional Const
-    PID_paras->PID_Pitch_para.Ki_Int=0;        		//»ı·Ö³£Êı  Integral Const
-    PID_paras->PID_Pitch_para.Kd_Int=0;      		//Î¢·Ö³£Êı Derivative Const
-	PID_paras->PID_Pitch_para.Kp_Ext=0;      		//±ÈÀı³£Êı Proportional Const
-    PID_paras->PID_Pitch_para.Ki_Ext=0;        		//»ı·Ö³£Êı  Integral Const
-    PID_paras->PID_Pitch_para.Kd_Ext=0;      		//Î¢·Ö³£Êı Derivative Const
-		
-	PID_paras->PID_Roll_para.Error_Int = 0;            	//e[k]
-    PID_paras->PID_Roll_para.LastError_Int = 0;           //e[k-1]
-	PID_paras->PID_Roll_para.PreError_Int = 0;            //e[k-2]
-	PID_paras->PID_Roll_para.Error_Ext = 0;            	//e[k]
-    PID_paras->PID_Roll_para.LastError_Ext = 0;           //e[k-1]
-	PID_paras->PID_Roll_para.PreError_Ext = 0;            //e[k-2]
-    PID_paras->PID_Roll_para.Kp_Int=0;      			//±ÈÀı³£Êı Proportional Const
-    PID_paras->PID_Roll_para.Ki_Int=0;        		//»ı·Ö³£Êı  Integral Const
-    PID_paras->PID_Roll_para.Kd_Int=0;      			//Î¢·Ö³£Êı Derivative Const
-	PID_paras->PID_Roll_para.Kp_Ext=0;      			//±ÈÀı³£Êı Proportional Const
-    PID_paras->PID_Roll_para.Ki_Ext=0;        		//»ı·Ö³£Êı  Integral Const
-    PID_paras->PID_Roll_para.Kd_Ext=0;      			//Î¢·Ö³£Êı Derivative Const
+{	
+	u8 i = 0;
+	for(i = 0; i<3; i++)
+	{
+		PID_paras->PID_YPR_para[i].Error_Int = 0;            	//e[k]
+		PID_paras->PID_YPR_para[i].LastError_Int = 0;            //e[k-1]
+		PID_paras->PID_YPR_para[i].PreError_Int = 0;             //e[k-2]
+		PID_paras->PID_YPR_para[i].Error_Ext = 0;            	//e[k]
+		PID_paras->PID_YPR_para[i].LastError_Ext = 0;            //e[k-1]
+		PID_paras->PID_YPR_para[i].PreError_Ext = 0;             //e[k-2]
+		PID_paras->PID_YPR_para[i].Kp_Int=0;      			//æ¯”ä¾‹å¸¸æ•° Proportional Const
+		PID_paras->PID_YPR_para[i].Ki_Int=0;        		//ç§¯åˆ†å¸¸æ•°  Integral Const
+		PID_paras->PID_YPR_para[i].Kd_Int=0;      			//å¾®åˆ†å¸¸æ•° Derivative Const
+		PID_paras->PID_YPR_para[i].Kp_Ext=0;      			//æ¯”ä¾‹å¸¸æ•° Proportional Const
+		PID_paras->PID_YPR_para[i].Ki_Ext=0;        		//ç§¯åˆ†å¸¸æ•°  Integral Const
+		PID_paras->PID_YPR_para[i].Kd_Ext=0;      			//å¾®åˆ†å¸¸æ•° Derivative Const
+	}
 }
 
 /**************************************************************/
-//º¯ÊıÃû£ºIncPID_Cal ÔöÁ¿Ê½PID¼ÆËã
-//Êä  Èë£º
-//Êä  ³ö£º
-//Ëµ  Ã÷£º
+//å‡½æ•°åï¼šIncPID_Cal å¢é‡å¼PIDè®¡ç®—
+//è¾“  å…¥ï¼š
+//è¾“  å‡ºï¼š
+//è¯´  æ˜ï¼š
 /**************************************************************/
-uint16_t IncPID_Cal(PID_PARA *PID_para, float Angle_ActualVal, float rad_ActualVal)
+uint16_t IncPID_Cal(PID_PARA *PID_para, IMUFusion *Attitude, YPR_ID YPR_id)  
 {
-	PID_para->Error_Int = PID_para->SetPoint_Ext  - Angle_ActualVal;  															//ÔöÁ¿¼ÆËã
-	PID_para->PIDcal_ExtOut = ((PID_para->Kp_Ext * ( PID_para->Error_Ext - PID_para->LastError_Ext ))                			//±ÈÀı»·½Ú
-                            +(PID_para->Ki_Ext * PID_para->Error_Ext)     														//»ı·Ö»·½Ú	
-							+(PID_para->Kd_Ext * (PID_para->Error_Ext + PID_para->PreError_Ext - 2 * PID_para->LastError_Ext)));//Î¢·Ö»·½Ú
+	PID_para->Error_Ext = PID_para->SetPoint_Ext  - Attitude->ypr[YPR_id];  													//å¢é‡è®¡ç®—
+	PID_para->PIDcal_ExtOut = ((PID_para->Kp_Ext * ( PID_para->Error_Ext - PID_para->LastError_Ext ))                			//æ¯”ä¾‹ç¯èŠ‚
+                            +(PID_para->Ki_Ext * PID_para->Error_Ext)     														//ç§¯åˆ†ç¯èŠ‚	
+							+(PID_para->Kd_Ext * (PID_para->Error_Ext + PID_para->PreError_Ext - 2 * PID_para->LastError_Ext)));//å¾®åˆ†ç¯èŠ‚
 
-	PID_para->PreError_Ext = PID_para->LastError_Ext;                    														//´æ´¢Îó²î£¬ÓÃÓÚÏÂ´Î¼ÆËã
+	PID_para->PreError_Ext = PID_para->LastError_Ext;                    														//å­˜å‚¨è¯¯å·®ï¼Œç”¨äºä¸‹æ¬¡è®¡ç®—
 	PID_para->LastError_Ext = PID_para->Error_Ext;
 	
 	PID_para->SetPoint_Int = PID_para->PIDcal_ExtOut;
-	PID_para->Error_Int = PID_para->SetPoint_Int -rad_ActualVal;
-	PID_para->PIDcal_IntOut = ((PID_para->Kp_Int * ( PID_para->Error_Int - PID_para->LastError_Int))                			 //±ÈÀı»·½Ú
-                            +(PID_para->Ki_Int * PID_para->Error_Int)     														 //»ı·Ö»·½Ú	
-							+(PID_para->Kd_Int * (PID_para->Error_Int + PID_para->PreError_Int - 2 * PID_para->LastError_Int))); //Î¢·Ö»·½Ú
+	PID_para->Error_Int = PID_para->SetPoint_Int -Attitude->ypr_rate[YPR_id];  
+	PID_para->PIDcal_IntOut = ((PID_para->Kp_Int * ( PID_para->Error_Int - PID_para->LastError_Int))                			 //æ¯”ä¾‹ç¯èŠ‚
+                            +(PID_para->Ki_Int * PID_para->Error_Int)     														 //ç§¯åˆ†ç¯èŠ‚	
+							+(PID_para->Kd_Int * (PID_para->Error_Int + PID_para->PreError_Int - 2 * PID_para->LastError_Int))); //å¾®åˆ†ç¯èŠ‚
               
-	PID_para->PreError_Int = PID_para->LastError_Int;                    														 //´æ´¢Îó²î£¬ÓÃÓÚÏÂ´Î¼ÆËã
+	PID_para->PreError_Int = PID_para->LastError_Int;                        													//å­˜å‚¨è¯¯å·®ï¼Œç”¨äºä¸‹æ¬¡è®¡ç®—
 	PID_para->LastError_Int = PID_para->Error_Int; 
 	
-	return(PID_para->PIDcal_IntOut);                                    														 //·µ»ØÔöÁ¿Öµ
+	return(PID_para->PIDcal_IntOut);                                    														 //è¿”å›å¢é‡å€¼
 }

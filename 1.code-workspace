@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"stm32f10x.h": "c",
+			"upload_state_machine.h": "c"
+		}
+	}
+}
