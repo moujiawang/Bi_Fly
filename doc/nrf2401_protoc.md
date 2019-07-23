@@ -21,20 +21,26 @@ DTU_NRF_Status 是一个u8变量，其中每一位代表的含义：
 |---|---|---|---|---|---|---|---|---|
 ||暂留|暂留|MODE_ID3|MODE_ID2|MODE_ID1| DTU是否能正常通讯 | NRF是否通讯正常 | NRF是否在线 |
 
-## 握手码：  
-###下行  
+
+## 上行  
+
+| 字节数 |31|30|29|28|27|26|25|24|
+|---|---|---|---|---|---|---|---|---|
+||||SYS_Status|系统时间_H2|系统时间_H1|系统时间_L2|系统时间_L1|当前横滚角_H|
+| 字节数 |23|22|21|20|19|18|17|16|
+||当前横滚角_L|当前俯仰角_H|当前俯仰角_L|当前偏航角_H|当前偏航角_L|Roll_Kd_Ext|Roll_Ki_Ext|Roll_Kp_Ext|
+|字节数| 15|14|13|12| 11 | 10 | 9 | 8 |
+||Roll_Kd_Int|Roll_Ki_Int|Roll_Kp_Int|Pitch_Kd_Ext|Pitch_Ki_Ext|Pitch_Kp_Ext|Pitch_Kd_Int|Pitch_Ki_Int|
+|字节数| 7 | 6 | 5 |4| 3 | 2 | 1 | 0 |
+||Pitch_Kp_Int|Yaw_Kd_Ext|Yaw_Ki_Ext|Yaw_Kp_Ext|Yaw_Kd_Int|Yaw_Ki_Int|Yaw_Kp_Int|0xAA|
+||||||||||
+
+## 下行
+### 握手码：  
+ 
 | 字节数 | 1 | 0 |
 |---|---|---|
 |  |模式|0x18|
-###上行  
-| 字节数 |28|27|26|25|24|23|22|21|20|19|18|17|16|15|14|13|
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-|  |系统时间_H2|系统时间_H1|系统时间_L2|系统时间_L1|当前横滚角_H|当前横滚角_L|当前俯仰角_H|当前俯仰角_L|当前偏航角_H|当前偏航角_L|Roll_Kd_Ext|Roll_Ki_Ext|Roll_Kp_Ext|Roll_Kd_Int|Roll_Ki_Int|Roll_Kp_Int|
-| |12|11| 10 | 9 | 8 | 7 | 6 | 5 |4| 3 | 2 | 1 | 0 |
-|  |Pitch_Kd_Ext|Pitch_Ki_Ext|Pitch_Kp_Ext|Pitch_Kd_Int|Pitch_Ki_Int|Pitch_Kp_Int|Yaw_Kd_Ext|Yaw_Ki_Ext|Yaw_Kp_Ext|Yaw_Kd_Int|Yaw_Ki_Int|Kp_Int|0xAA|
-
-## 下行
-
 ### 手动控制模式
 
 报文ID: 0xA0

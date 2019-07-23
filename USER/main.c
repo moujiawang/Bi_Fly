@@ -29,13 +29,15 @@ u8 Tx_buf[TX_PLOAD_WIDTH] = {0};
 u8 RX_Result;
 u8 TX_Result;
 u8 Mode_ID;
-TX_FLAG Tx_Flag = 0;		
+TX_FLAG Tx_Flag = TX_WAIT;		
 
 IMUFusion imu_fusion_module;
 ACTUATOR_STATUS Actuator_Status;
 MOTION_STATUS Motion_Status;
 PID_PARAS PID_Paras;
 SYS_STATUS SYS_Status; 
+
+#define MODE_STATUS (SYS_Status.DTU_NRF_Status|0x38)
 
 int main(void)
 {
@@ -58,7 +60,7 @@ int main(void)
 	imu_fusion_init(&imu_fusion_module);
 	////////////////////////////////////
 	while( NRF24L01_Check() == 1);
-	SYS_status.DTU_NRF_Status |= NRF_ON;											//有NRF在线,更新标志位
+	SYS_Status.DTU_NRF_Status |= NRF_ON;											//有NRF在线,更新标志位
 	
 	Command_patch(Tx_buf, &PID_Paras, &Actuator_Status, &imu_fusion_module, START_MODE);		//更新Tx_buf
 	do
@@ -66,12 +68,12 @@ int main(void)
 		rx_len = NRF24L01_Tx_ACKwithpayload(Tx_buf, Rx_buf);
 		if((rx_len>0)&&(rx_len<33))
 		{
-			SYS_status.DTU_NRF_Status |= NRF_CONNECTED；
+			SYS_Status.DTU_NRF_Status |= NRF_CONNECTED;
 			break;
 		}
 	}
 	while(1);//只有当NRF24L01在线并且通讯正常时才会跳过次循环																		//直至握手成功后，退出循环
-	SYS_status.DTU_NRF_Status = SYS_status.DTU_NRF_Status & 0xC7;//模式信息更新为 START MODE
+	SYS_Status.DTU_NRF_Status = SYS_Status.DTU_NRF_Status & 0xC7;//模式信息更新为 START MODE
 	
 	
 /*	while(Receive_complete_flag == 0 )												//等待DTU第一次握手
@@ -104,21 +106,21 @@ int main(void)
 		/////////////////////////////////////////
 		if(Tx_Flag == TX_GO)
 		{
-			Command_patch(Tx_buf, &PID_paras, &Actuator_Status, &imu_fusion_module,MODE_STATUS);		//打包数据，更新Tx_buf，准备发送
+			Command_patch(Tx_buf, &PID_Paras, &Actuator_Status, &imu_fusion_module, MODE_STATUS);		//打包数据，更新Tx_buf，准备发送
 			rx_len = NRF24L01_Tx_ACKwithpayload(Tx_buf, Rx_buf);
 			if((rx_len>0)&&(rx_len<33))
 			{	
 				//刷新状态标志和模式信息
-				SYS_status.DTU_NRF_Status |= NRF_CONNECTED；
+				SYS_Status.DTU_NRF_Status |= NRF_CONNECTED;
 				Command_dispatch(Rx_buf, &Actuator_Status, &Motion_Status, &PID_Paras,&SYS_Status);
 			}
 			else
 			{
-				SYS_status.DTU_NRF_Status &= (~NRF_CONNECTED)；
+				SYS_Status.DTU_NRF_Status &= (~NRF_CONNECTED);
 				NRF24L01_FlushTX();
 				if(NRF24L01_Check())
 				{
-					SYS_status.DTU_NRF_Status |= FAULT_MODE;
+					SYS_Status.DTU_NRF_Status |= FAULT_MODE;
 				}
 			}
 		}
@@ -130,8 +132,27 @@ int main(void)
 			};break;
 			case ACTUATOR_MODE:Actuator_command(&Actuator_Status);break;
 			case MOTION_MODE  :Motion_command(&Motion_Status);break;
-			case PID_MODE     :PID_command(&PID_paras);break;
-			case FAULT_MODE   :Fault_command(&SYS_Status);
+			case PID_MODE     :PID_command(&PID_Paras);break;
+			case FAULT_MODE   :
+			{
+				if(NRF24L01_Check())
+						SYS_Status.DTU_NRF_Status &= NRF_OFF;
+				else
+						SYS_Status.DTU_NRF_Status |= NRF_ON;
+				
+				Command_patch(Tx_buf, &PID_Paras, &Actuator_Status, &imu_fusion_module, START_MODE);		//更新Tx_buf
+				do
+				{
+					rx_len = NRF24L01_Tx_ACKwithpayload(Tx_buf, Rx_buf);
+					if((rx_len>0)&&(rx_len<33))
+					{
+						SYS_Status.DTU_NRF_Status |= NRF_CONNECTED;
+						break;
+					}
+				}
+				while(1);//只有当NRF24L01在线并且通讯正常时才会跳过次循环
+				SYS_Status.DTU_NRF_Status = (SYS_Status.DTU_NRF_Status & 0xc7)|Rx_buf[1];
+			};
 		}
 		
 

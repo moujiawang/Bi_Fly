@@ -3,14 +3,18 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "D:/MinGW/lib/gcc/mingw32/6.3.0/include",
+                "D:/MinGW/include"
             ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE"
             ],
-            "intelliSenseMode": "msvc-x64"
+            "intelliSenseMode": "gcc-x64",
+            "cStandard": "c11",
+            "compilerPath": ""
         }
     ],
     "version": 4

@@ -83,7 +83,7 @@ void PID_assignment(const u8 *rx_buff, PID_PARAS *PID_paras)
 ============================================================================*/
 void START_assignment(const u8 *rx_buff, SYS_STATUS *SYS_status)
 {
-	SYS_Status.DTU_NRF_Status = (SYS_Status.DTU_NRF_Status & 0xc7)|rx_buff[1];		//更新模式信息
+	SYS_status->DTU_NRF_Status = (SYS_status->DTU_NRF_Status & 0xc7)|rx_buff[1];		//更新模式信息
 }
 
 
@@ -136,6 +136,7 @@ void Command_patch(u8 *tx_buff, PID_PARAS *PID_paras, ACTUATOR_STATUS *Actuator_
 		*(u16 *)&tx_buff[21] = (u16)((Attitude->ypr[1]) * 100);
 		*(u16 *)&tx_buff[23] = (u16)((Attitude->ypr[2]) * 100);
 		*(uint32_t *)&tx_buff[25] = Attitude->system_micrsecond;
+		*(tx_buff + 29) = 
 	}
 	else
 	{

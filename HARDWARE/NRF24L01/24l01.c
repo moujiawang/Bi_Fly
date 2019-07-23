@@ -1,7 +1,9 @@
+#include "stm32f10x.h"
 #include "24l01.h"
 #include "delay.h"
 #include "spi.h"
 #include "usart.h"
+#include "nrf_protocol.h"
 //////////////////////////////////////////////////////////////////////////////////	 
 //本程序只供学习使用，未经作者许可，不得用于其它任何用途
 //ALIENTEK战舰STM32开发板
@@ -19,7 +21,7 @@ const u8 TX_ADDRESS[ADR_WIDTH]={0x34,0x43,0x10,0x10,0x01}; //发送地址
 const u8 RX_ADDRESS[ADR_WIDTH]={0x34,0x43,0x10,0x10,0x01};
 
 /*===========================================================================
-* 函数 ：NRF24L01_Init =》 初始化NRF24L01L01                                 * 
+* 函数 ：NRF24L01_Init =》 初始化NRF24L01                               * 
 * 输入 ：mode，=TX_MODE, TX mode; =RX_MODE, RX mode	
 * 说明 : 执行完此函数后，收发模式已经确定，所有的配置已经完成
 		 这里的函数是配置成 ACK+DPL(动态包)模式
@@ -78,7 +80,7 @@ void NRF24L01_Init(NRF24L01_MODE RxTx_mode)
 		 	 
 }
 //检测24L01是否存在
-//返回值:0，成功;1，失败	
+//返回值:成功:0 ;失败: 1	，
 u8 NRF24L01_Check(void)
 {
 	u8 buf[5];
@@ -269,22 +271,4 @@ u8 NRF24L01_Tx_ACKwithpayload(u8 *tx_buf, u8 *rx_buf)
 		}
 	}
 	return  0x00;														//NRF通讯不正常，返回0x00
-}
-
-void Fault_command(SYS_STATUS *SYS_Status)
-{
-	u8 rx_len = 0;
-	while(NRF24L01_Check());
-	Command_patch(Tx_buf, &PID_Paras, &Actuator_Status, &imu_fusion_module, START_MODE);		//更新Tx_buf
-	do
-	{
-		rx_len = NRF24L01_Tx_ACKwithpayload(Tx_buf, Rx_buf);
-		if((rx_len>0)&&(rx_len<33))
-		{
-			SYS_status.DTU_NRF_Status |= NRF_CONNECTED；
-			break;
-		}
-	}
-	while(1);//只有当NRF24L01在线并且通讯正常时才会跳过次循环
-	SYS_Status.DTU_NRF_Status = (SYS_Status.DTU_NRF_Status & 0xc7)|rx_buff[1];
 }

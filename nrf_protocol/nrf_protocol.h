@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include "stm32f10x.h"
 
+typedef enum{ TX_MODE, RX_MODE } NRF24L01_MODE; 		//TX_MODE->0,RX_MODE->1
+typedef enum{ PID_YAW, PID_PITCH,PID_ROLL } PID_ID;     //PID_YAW->0, PID_PITCH->1,PID_ROLL->2
+typedef enum{ TX_WAIT, TX_GO } TX_FLAG;					//Tx_Flag
+
 typedef struct
 {
     float q0;						//q0-q3四元数
@@ -106,13 +110,11 @@ typedef struct
 #define FAULT_MODE    0x38						//0011 1000
  
 
-#define MODE_STATUS (SYS_status.DTU_NRF_Status|0x38)
 
-typedef enum{ TX_MODE, RX_MODE } NRF24L01_MODE; 		//TX_MODE->0,RX_MODE->1
-typedef enum{ PID_YAW, PID_PITCH,PID_ROLL } PID_ID;     //PID_YAW->0, PID_PITCH->1,PID_ROLL->2
-typedef enum{ TX_WAIT, TX_GO } TX_FLAG;					//Tx_Flag
 
-u8 Command_dispatch(u8 *rx_buff, ACTUATOR_STATUS *Actuator_status, MOTION_STATUS *Motion_status, PID_PARAS *PID_paras，SYS_STATUS *SYS_status);
+
+
+u8 Command_dispatch(u8 *rx_buff, ACTUATOR_STATUS *Actuator_status, MOTION_STATUS *Motion_status, PID_PARAS *PID_paras, SYS_STATUS *SYS_status);
 void Command_patch(u8 *tx_buff, PID_PARAS *PID_paras, ACTUATOR_STATUS* Actuator_Status, IMUFusion* Attitude, u8 mode_id);
 void Actuator_assignment(const u8 *rx_buff, ACTUATOR_STATUS *Actuator_status);
 void Motion_assignment(const u8 *rx_buff, MOTION_STATUS *Motion_status);
