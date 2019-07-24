@@ -227,7 +227,7 @@ void MPU6050_getMotion6(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int1
     MPU6050_Lastgy=(((int16_t)buffer[10]) << 8) | buffer[11];
     MPU6050_Lastgz=(((int16_t)buffer[12]) << 8) | buffer[13];
 	MPU6050_newValues(MPU6050_Lastax,MPU6050_Lastay,MPU6050_Lastaz
-		,MPU6050_Lastgx,MPU6050_Lastgy,MPU6050_Lastgz);
+		,MPU6050_Lastgx,MPU6050_Lastgy,MPU6050_Lastgz);						//滤波
 	*ax  =MPU6050_FIFO[0][10];
 	*ay  =MPU6050_FIFO[1][10];
 	*az = MPU6050_FIFO[2][10];

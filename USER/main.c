@@ -29,28 +29,22 @@ u8 Rx_buf[RX_PLOAD_WIDTH] = {0};
 u8 Tx_buf[TX_PLOAD_WIDTH] = {0};
 u8 RX_Result;
 u8 TX_Result;
-u8 Mode_ID;
-<<<<<<< HEAD
+u8 Mode_Id;
+ 
+SYS_STATUS SYS_Status;
+
 TX_FLAG Tx_Flag = TX_WAIT;		
-=======
-TX_FLAG Tx_Flag = 0;	
 
-//系统的状态量
-SYS_STATUS SYS_Status; 	
->>>>>>> 67753ccbe8b87348627ef750ab8053a7a981ca88
-
-#define MODE_STATUS (SYS_Status.DTU_NRF_Status|0x38)
-
-#define MODE_STATUS (SYS_Status.DTU_NRF_Status|0x38)
+#define MODE_STATUS (SYS_Status.DTU_NRF_Status & 0x38)
 
 int main(void)
 {
 	u8 sta_tmp = 0;
 	u8 rx_len = 0;
-	u8 Mode_ID = 0xff;
 
+	Mode_init(&SYS_Status);
 	delay_init();
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
 //	DTU_init();																		//数传模块初始化
 	motor_init();																	//电机控制定时器初始化
@@ -66,18 +60,19 @@ int main(void)
 	while( NRF24L01_Check() == 1);
 	SYS_Status.DTU_NRF_Status |= NRF_ON;											//有NRF在线,更新标志位
 	
-	Command_patch(Tx_buf, &SYS_Status, START_MODE);		//更新Tx_buf
+	Command_patch(Tx_buf, &SYS_Status, START_MODE);		                            //更新Tx_buf
 	do
 	{
 		rx_len = NRF24L01_Tx_ACKwithpayload(Tx_buf, Rx_buf);
-		if((rx_len>0)&&(rx_len<33))
+		if(rx_len != 0x00)
 		{
 			SYS_Status.DTU_NRF_Status |= NRF_CONNECTED;
+			
 			break;
 		}
 	}
-	while(1);//只有当NRF24L01在线并且通讯正常时才会跳过次循环																		//直至握手成功后，退出循环
-	SYS_Status.DTU_NRF_Status = SYS_Status.DTU_NRF_Status & 0xC7;//模式信息更新为 START MODE
+	while(1);//只有当NRF24L01在线并且通讯正常时才会跳过此循环						//直至握手成功后，退出循环
+	SYS_Status.DTU_NRF_Status |= START_MODE;										//模式信息更新为 START MODE
 	
 	
 /*	while(Receive_complete_flag == 0 )												//等待DTU第一次握手
@@ -110,21 +105,13 @@ int main(void)
 		/////////////////////////////////////////
 		if(Tx_Flag == TX_GO)
 		{
-<<<<<<< HEAD
-			Command_patch(Tx_buf, &PID_Paras, &Actuator_Status, &imu_fusion_module, MODE_STATUS);		//打包数据，更新Tx_buf，准备发送
-=======
 			Command_patch(Tx_buf, &SYS_Status, MODE_STATUS);		//打包数据，更新Tx_buf，准备发送
->>>>>>> 67753ccbe8b87348627ef750ab8053a7a981ca88
 			rx_len = NRF24L01_Tx_ACKwithpayload(Tx_buf, Rx_buf);
 			if((rx_len>0)&&(rx_len<33))
 			{	
 				//刷新状态标志和模式信息
 				SYS_Status.DTU_NRF_Status |= NRF_CONNECTED;
-<<<<<<< HEAD
-				Command_dispatch(Rx_buf, &Actuator_Status, &Motion_Status, &PID_Paras,&SYS_Status);
-=======
 				Command_dispatch(Rx_buf,&SYS_Status);
->>>>>>> 67753ccbe8b87348627ef750ab8053a7a981ca88
 			}
 			else
 			{
@@ -143,10 +130,9 @@ int main(void)
 			{
 				//init_motor();
 			};break;
-<<<<<<< HEAD
-			case ACTUATOR_MODE:Actuator_command(&Actuator_Status);break;
-			case MOTION_MODE  :Motion_command(&Motion_Status);break;
-			case PID_MODE     :PID_command(&PID_Paras);break;
+			case ACTUATOR_MODE:Actuator_command(&SYS_Status.Actuator_Status);break;
+			case MOTION_MODE  :Motion_command(&SYS_Status.Motion_Status);break;
+			case PID_MODE     :PID_command(&SYS_Status);break;
 			case FAULT_MODE   :
 			{
 				if(NRF24L01_Check())
@@ -154,7 +140,7 @@ int main(void)
 				else
 						SYS_Status.DTU_NRF_Status |= NRF_ON;
 				
-				Command_patch(Tx_buf, &PID_Paras, &Actuator_Status, &imu_fusion_module, START_MODE);		//更新Tx_buf
+				Command_patch(Tx_buf, &SYS_Status, MODE_STATUS);		//打包数据，更新Tx_buf，准备发送
 				do
 				{
 					rx_len = NRF24L01_Tx_ACKwithpayload(Tx_buf, Rx_buf);
@@ -167,18 +153,6 @@ int main(void)
 				while(1);//只有当NRF24L01在线并且通讯正常时才会跳过次循环
 				SYS_Status.DTU_NRF_Status = (SYS_Status.DTU_NRF_Status & 0xc7)|Rx_buf[1];
 			};
-=======
-			case ACTUATOR_MODE:
-			{
-				if(Tx_Flag == TX_GO)//有指令刷新时执行一次							
-				{
-					Actuator_command(&SYS_Status.Actuator_Status);break;
-				}
-			}
-			case MOTION_MODE  :Motion_command(&SYS_Status.Motion_Status);break;
-			case PID_MODE     :PID_command(&SYS_Status);break;
-			case FAULT_MODE   :Fault_command(&SYS_Status);break;
->>>>>>> 67753ccbe8b87348627ef750ab8053a7a981ca88
 		}
 		Tx_Flag = TX_WAIT;//复位心跳标志位，等待下次进入	
 		

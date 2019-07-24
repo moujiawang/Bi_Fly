@@ -5,13 +5,17 @@
 #include "stm32f10x.h"
 
 typedef enum{ TX_MODE, RX_MODE } NRF24L01_MODE; 		//TX_MODE->0,RX_MODE->1
-<<<<<<< HEAD
 typedef enum{ PID_YAW, PID_PITCH,PID_ROLL } PID_ID;     //PID_YAW->0, PID_PITCH->1,PID_ROLL->2
 typedef enum{ TX_WAIT, TX_GO } TX_FLAG;					//Tx_Flag
-=======
-typedef enum{ TX_WAIT, TX_GO } TX_FLAG;					//Tx_Flag
 typedef enum{ YAW, PITCH, ROLL } YPR_ID;				//YAW->0, PITCH->1,ROLL->2
->>>>>>> 67753ccbe8b87348627ef750ab8053a7a981ca88
+typedef enum{ 	
+				FAULT_MODE = 0x00, 
+				START_MODE = 0x08, 
+				MANUAL_MODE = 0x10,
+				FLIGHT_MODE = 0x18,
+				TUNING_MODE = 0x38 
+			} MODE_ID;									//FAULT_MODE = 0x00, START_MODE = 0x08, MANUAL_MODE = 0x10,FLIGHT_MODE = 0x18,TUNING_MODE = 0x38
+
 
 typedef struct
 {
@@ -104,31 +108,17 @@ typedef struct
 #define NRF_OFF           0xfe					//NRF不在线
 
 //NRF24L01和接收机通讯标志号
-#define NRF_CONNECTED     0x02	
+#define NRF_CONNECTED     0x02					//NRF通讯成功
 #define NRF_DISCONNECTED  0xFD					//NRF通讯失败
 #define DTU_OK            0x03					//DTU接收机通讯正常就表明在线，DTU无是否在线的检测标志位
 
 
-//模式标志号
-#define START_MODE    0x00						//0000 0000
-#define MOTION_MODE   0x08						//0000 1000
-#define PID_MODE      0x10						//0001 0000
-#define ACTUATOR_MODE 0x18						//0001 1000
-#define FAULT_MODE    0x38						//0011 1000
+
  
 
-<<<<<<< HEAD
-
-
-
-
-u8 Command_dispatch(u8 *rx_buff, ACTUATOR_STATUS *Actuator_status, MOTION_STATUS *Motion_status, PID_PARAS *PID_paras, SYS_STATUS *SYS_status);
-void Command_patch(u8 *tx_buff, PID_PARAS *PID_paras, ACTUATOR_STATUS* Actuator_Status, IMUFusion* Attitude, u8 mode_id);
-=======
-
+u8 Mode_init(SYS_STATUS *SYS_status);
 u8 Command_dispatch(u8 *rx_buff, SYS_STATUS *SYS_status);
 void Command_patch(u8 *tx_buff, SYS_STATUS *SYS_status, u8 mode_id);
->>>>>>> 67753ccbe8b87348627ef750ab8053a7a981ca88
 void Actuator_assignment(const u8 *rx_buff, ACTUATOR_STATUS *Actuator_status);
 void Motion_assignment(const u8 *rx_buff, MOTION_STATUS *Motion_status);
 void PID_assignment(const u8 *rx_buff, PID_PARAS *PID_paras);

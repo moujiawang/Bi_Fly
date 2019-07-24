@@ -272,24 +272,3 @@ u8 NRF24L01_Tx_ACKwithpayload(u8 *tx_buf, u8 *rx_buf)
 	}
 	return  0x00;														//NRF通讯不正常，返回0x00
 }
-<<<<<<< HEAD
-=======
-
-void Fault_command(SYS_STATUS *SYS_Status)
-{
-	u8 rx_len = 0;
-	while(NRF24L01_Check());	
-	Command_patch(Tx_buf, &SYS_Status, START_MODE);		//更新Tx_buf
-	do
-	{
-		rx_len = NRF24L01_Tx_ACKwithpayload(Tx_buf, Rx_buf);
-		if((rx_len>0)&&(rx_len<33))
-		{
-			SYS_status.DTU_NRF_Status |= NRF_CONNECTED；
-			break;
-		}
-	}
-	while(1);//只有当NRF24L01在线并且通讯正常时才会跳过次循环
-	SYS_Status.DTU_NRF_Status = (SYS_Status.DTU_NRF_Status & 0xc7)|rx_buff[1];
-}
->>>>>>> 67753ccbe8b87348627ef750ab8053a7a981ca88

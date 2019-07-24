@@ -4,6 +4,13 @@
 #include "nrf_protocol.h"
 //#include "motor.h"
 
+u8 Mode_init(SYS_STATUS *SYS_status)
+{
+	SYS_status->DTU_NRF_Status = 0x00;
+	SYS_status->DTU_NRF_Status |= FAULT_MODE;										//初始化模式就行故障模式
+	return 0x00;
+}
+
 void Actuator_assignment(const u8 *rx_buff, ACTUATOR_STATUS *Actuator_status)
 {
 	//    ACTUATOR_STATUS temp_basic_control;
@@ -114,31 +121,6 @@ void Command_patch(u8 *tx_buff, SYS_STATUS *SYS_status, u8 mode_id)
 	if (mode_id == START_MODE)
 	{
 		*tx_buff = 0xAA;
-<<<<<<< HEAD
-		*(tx_buff + 1) = PID_paras->PID_Yaw_para.Kp_Int;
-		*(tx_buff + 2) = PID_paras->PID_Yaw_para.Ki_Int;
-		*(tx_buff + 3) = PID_paras->PID_Yaw_para.Kd_Int;
-		*(tx_buff + 4) = PID_paras->PID_Yaw_para.Kp_Ext;
-		*(tx_buff + 5) = PID_paras->PID_Yaw_para.Ki_Ext;
-		*(tx_buff + 6) = PID_paras->PID_Yaw_para.Kd_Ext;
-		*(tx_buff + 7) = PID_paras->PID_Pitch_para.Kp_Int;
-		*(tx_buff + 8) = PID_paras->PID_Pitch_para.Ki_Int;
-		*(tx_buff + 9) = PID_paras->PID_Pitch_para.Kd_Int;
-		*(tx_buff + 10) = PID_paras->PID_Pitch_para.Kp_Ext;
-		*(tx_buff + 11) = PID_paras->PID_Pitch_para.Ki_Ext;
-		*(tx_buff + 12) = PID_paras->PID_Pitch_para.Kd_Ext;
-		*(tx_buff + 13) = PID_paras->PID_Roll_para.Kp_Int;
-		*(tx_buff + 14) = PID_paras->PID_Roll_para.Ki_Int;
-		*(tx_buff + 15) = PID_paras->PID_Roll_para.Kd_Int;
-		*(tx_buff + 16) = PID_paras->PID_Roll_para.Kp_Ext;
-		*(tx_buff + 17) = PID_paras->PID_Roll_para.Ki_Ext;
-		*(tx_buff + 18) = PID_paras->PID_Roll_para.Kd_Ext;
-		*(u16 *)&tx_buff[19] = (u16)((Attitude->ypr[0]) * 100);
-		*(u16 *)&tx_buff[21] = (u16)((Attitude->ypr[1]) * 100);
-		*(u16 *)&tx_buff[23] = (u16)((Attitude->ypr[2]) * 100);
-		*(uint32_t *)&tx_buff[25] = Attitude->system_micrsecond;
-		*(tx_buff + 29) = 
-=======
 		*(tx_buff + 1) = SYS_status->PID_Paras.PID_YPR_para[YAW].Kp_Int;
 		*(tx_buff + 2) = SYS_status->PID_Paras.PID_YPR_para[YAW].Ki_Int;
 		*(tx_buff + 3) = SYS_status->PID_Paras.PID_YPR_para[YAW].Kd_Int;
@@ -161,7 +143,6 @@ void Command_patch(u8 *tx_buff, SYS_STATUS *SYS_status, u8 mode_id)
 		*(u16 *)&tx_buff[21] = (u16)((SYS_status->imu_fusion_module.ypr[1]) * 100);
 		*(u16 *)&tx_buff[23] = (u16)((SYS_status->imu_fusion_module.ypr[2]) * 100);
 		*(uint32_t *)&tx_buff[25] = SYS_status->imu_fusion_module.system_micrsecond;
->>>>>>> 67753ccbe8b87348627ef750ab8053a7a981ca88
 	}
 	else
 	{

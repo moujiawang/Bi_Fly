@@ -4,9 +4,8 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "D:/MinGW/lib/gcc/mingw32/6.3.0/include",
-                "D:/MinGW/include",
-                "D:/Keil_v5/ARM/ARMCC/include"
+                "C:/Keil_v5/ARM/ARMCC/include",
+                "C:/Keil_v5/ARM/Pack/Keil/STM32F1xx_DFP/1.0.5/Device/Include"
             ],
             "defines": [
                 "_DEBUG",

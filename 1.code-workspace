@@ -7,7 +7,9 @@
 	"settings": {
 		"files.associations": {
 			"stm32f10x.h": "c",
-			"upload_state_machine.h": "c"
+			"upload_state_machine.h": "c",
+			"24l01.h": "c",
+			"sys.h": "c"
 		}
 	}
 }
