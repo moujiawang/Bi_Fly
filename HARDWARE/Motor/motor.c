@@ -5,6 +5,7 @@
 #include "string.h"
 #include "IncPID.h"
 #include "motor.h"
+#include "attitude_pid.h"
 
 
 void motor_init(void)
@@ -120,8 +121,14 @@ void motor_init(void)
 	TIM_OC4PreloadConfig(TIM2,TIM_OCPreload_Enable);
 }
 
-
-void Command_manage(int32_t Command_length[],ACTUATOR_STATUS* Actuator_Status)
+/*===========================================================================
+* 函数 ：Command_manage                                  
+* 输入 ：int32_t Command_length[],MANUAL_STATUS* Manual_Status
+* 返回 ：无；		  				
+* 说明 ：此函数是用于解包DTU数据包，解析遥控的指令，用于控制飞爬的电机速度控制
+		和三个舵机位置控制
+============================================================================*/
+void Command_manage(int32_t Command_length[],MANUAL_STATUS* Manual_Status)
 {
 	TIM_OCInitTypeDef TIM_OCInitStruct;
 
@@ -130,12 +137,12 @@ void Command_manage(int32_t Command_length[],ACTUATOR_STATUS* Actuator_Status)
 	
 //判断当前飞爬指令
 	if((7800 < (Command_length[6]-4000)) && ((Command_length[6]-4000) < 8200))
-		Actuator_Status->Fly_or_Climb_Status = STOP;
+		Manual_Status->Fly_or_Climb_Status = STOP;
 	else 
 		if((Command_length[6]-4000) < 7800)
-			Actuator_Status->Fly_or_Climb_Status = FLY;
+			Manual_Status->Fly_or_Climb_Status = FLY;
 		else 
-			Actuator_Status->Fly_or_Climb_Status = CLIMB;
+			Manual_Status->Fly_or_Climb_Status = CLIMB;
 //飞爬速度指令处理
 	if( (Command_length[1] <= 12064)  && (Command_length[1] > 11936) )
 		Motion_Pulse = 0;
@@ -153,7 +160,7 @@ void Command_manage(int32_t Command_length[],ACTUATOR_STATUS* Actuator_Status)
 
 	Control_Pulse = ((Command_length[2] -12000)/75 + 75) << 1;	
 
-		switch(Actuator_Status->Fly_or_Climb_Status)
+		switch(Manual_Status->Fly_or_Climb_Status)
 		{
 			case FLY:
 			{
@@ -166,8 +173,8 @@ void Command_manage(int32_t Command_length[],ACTUATOR_STATUS* Actuator_Status)
 			//拍打机构电机控制--使能，占空比设置
 				TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Enable;
-				Actuator_Status->Fly_Pulse = Motion_Pulse;
-				TIM_OCInitStruct.TIM_Pulse = Actuator_Status->Fly_Pulse;
+				Manual_Status->Fly_Pulse = Motion_Pulse;
+				TIM_OCInitStruct.TIM_Pulse = Manual_Status->Fly_Pulse;
 				TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
 
 				TIM_OC3Init(TIM3, &TIM_OCInitStruct);
@@ -185,8 +192,8 @@ void Command_manage(int32_t Command_length[],ACTUATOR_STATUS* Actuator_Status)
 			//爬行机构电机控制--使能，占空比设置
 				TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Enable;
-				Actuator_Status->Climb_Pulse = Motion_Pulse; 
-				TIM_OCInitStruct.TIM_Pulse = Actuator_Status->Climb_Pulse;
+				Manual_Status->Climb_Pulse = Motion_Pulse; 
+				TIM_OCInitStruct.TIM_Pulse = Manual_Status->Climb_Pulse;
 				TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
 
 				TIM_OC4Init(TIM3, &TIM_OCInitStruct);
@@ -199,14 +206,14 @@ void Command_manage(int32_t Command_length[],ACTUATOR_STATUS* Actuator_Status)
 				TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Disable;
 				TIM_OC3Init(TIM3, &TIM_OCInitStruct);
-				Actuator_Status->Climb_Pulse = 0;
+				Manual_Status->Climb_Pulse = 0;
 			//爬行机构电机控制--停止爬行
 				TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
 				//TIM_OCInitStruct.TIM_Pulse = 150;
 				TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Disable;
 				TIM_OC4Init(TIM3, &TIM_OCInitStruct);
-				Actuator_Status->Fly_Pulse = 0;
+				Manual_Status->Fly_Pulse = 0;
 			};break;
 		}
 /*//舵机位置指令处理
@@ -235,15 +242,15 @@ void Command_manage(int32_t Command_length[],ACTUATOR_STATUS* Actuator_Status)
 */
 }
 
-void Actuator_command(const ACTUATOR_STATUS* Actuator_status)
+void Manual_command(const MANUAL_STATUS* Manual_status)
 {
 	TIM_OCInitTypeDef TIM_OCInitStruct;
 	
-	if( Actuator_status->Fly_Pulse > 3 )								 	//拍打电机Enable，并设置占空比
+	if( Manual_status->Fly_Pulse > 3 )								 		//拍打电机Enable，并设置占空比
 	{
 		TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
-		if( Actuator_status->Fly_Pulse <= 100 )
-			TIM_OCInitStruct.TIM_Pulse = Actuator_status->Fly_Pulse;
+		if( Manual_status->Fly_Pulse <= 100 )
+			TIM_OCInitStruct.TIM_Pulse = Manual_status->Fly_Pulse;
 		else
 			TIM_OCInitStruct.TIM_Pulse = 100;
 		TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
@@ -258,11 +265,11 @@ void Actuator_command(const ACTUATOR_STATUS* Actuator_status)
 		TIM_OCInitStruct.TIM_OutputState = TIM_OutputState_Disable;
 		TIM_OC3Init(TIM3, &TIM_OCInitStruct);
 	}
-	if( Actuator_status->Climb_Pulse > 3 )									 //爬行电机Enable，并设置占空比
+	if( Manual_status->Climb_Pulse > 3 )									 //爬行电机Enable，并设置占空比
 	{
 		TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
-		if(Actuator_status->Climb_Pulse <= 100)
-			TIM_OCInitStruct.TIM_Pulse = Actuator_status->Climb_Pulse;
+		if(Manual_status->Climb_Pulse <= 100)
+			TIM_OCInitStruct.TIM_Pulse = Manual_status->Climb_Pulse;
 		else
 			TIM_OCInitStruct.TIM_Pulse = 100;
 		TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
@@ -277,30 +284,33 @@ void Actuator_command(const ACTUATOR_STATUS* Actuator_status)
 		TIM_OCInitStruct.TIM_OutputState = TIM_OutputState_Disable;
 		TIM_OC3Init(TIM3, &TIM_OCInitStruct);
 	}
-	TIM_SetCompare2(TIM2,Actuator_status->Roll_Pulse);						//刷新翻滚控制舵机占空比
-	TIM_SetCompare3(TIM2,Actuator_status->Pitch_Pulse);						//刷新俯仰控制舵机占空比
-	TIM_SetCompare4(TIM2,Actuator_status->Yaw_Pulse);						//刷新偏航控制舵机占空比
+	TIM_SetCompare2(TIM2,Manual_status->Roll_Pulse);						//刷新翻滚控制舵机占空比
+	TIM_SetCompare3(TIM2,Manual_status->Pitch_Pulse);						//刷新俯仰控制舵机占空比
+	TIM_SetCompare4(TIM2,Manual_status->Yaw_Pulse);							//刷新偏航控制舵机占空比
 }
 
-void Motion_command(const MOTION_STATUS* Motion_Status)
+void Flight_command(const FLIGHT_STATUS* Flight_Status)
 {
 	
 }
+
 
 void PID_command(SYS_STATUS *SYS_status)
 {
 	YPR_ID pid_id = 0;
 	uint16_t inc_output = 0;
-	pid_id = SYS_status->PID_Paras.PID_id;      
-	inc_output = IncPID_Cal( &(SYS_status->PID_Paras.PID_YPR_para[pid_id]), &(SYS_status->imu_fusion_module), pid_id);
-	switch(pid_id)
-	{
-		case :;break;
-		case :;break;
-		case :;break;
-		
-	}
-	Actuator_command(&SYS_status->Actuator_Status );
+	pid_id = SYS_status->PID_Paras.PID_id;
+	attitudeAnglePID(&SYS_status->PID_Paras,&SYS_status->imu_fusion_module);	/* 角度环PID */	
+	attitudeRatePID(&SYS_status->PID_Paras,&SYS_status->imu_fusion_module);		/* 角速度环PID */
+	
+	//执行机构赋值
+	SYS_status->Manual_Status.Yaw_Pulse = SYS_status->PID_Paras.PID_YPR_para[YAW][RATE].PIDcal_Out;
+	SYS_status->Manual_Status.Pitch_Pulse = SYS_status->PID_Paras.PID_YPR_para[PITCH][RATE].PIDcal_Out - SYS_status->PID_Paras.PID_YPR_para[ROLL][RATE].PIDcal_Out;
+	SYS_status->Manual_Status.Roll_Pulse = SYS_status->PID_Paras.PID_YPR_para[PITCH][RATE].PIDcal_Out + SYS_status->PID_Paras.PID_YPR_para[ROLL][RATE].PIDcal_Out;
+	SYS_status->Manual_Status.Fly_Pulse = 100;
+	SYS_status->Manual_Status.Climb_Pulse = 0;
+	
+	Manual_command(&SYS_status->Manual_Status );
 }
   
 

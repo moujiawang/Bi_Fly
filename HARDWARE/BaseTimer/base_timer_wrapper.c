@@ -8,7 +8,7 @@ void delay_init()
 
 void delay_ms(u16 nms)
 {
-	base_timer_delay_ms(nms);
+	base_timer_delay_ms(nms); 
 }
 
 void delay_us(u32 nus)

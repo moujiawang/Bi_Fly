@@ -133,9 +133,37 @@ void PendSV_Handler(void)
   * @retval None
   */
 #include "base_timer.h"
+
+extern u8 Start_task_Delay;
+extern u8 Manual_task_Delay;
+extern u8 Flight_task_Delay;
+extern u8 Tuning_task_Delay;
+extern u8 Fault_task_Delay;
+
 void SysTick_Handler(void)
 {
+	if (Start_task_Delay != 0 )
+    {
+        Start_task_Delay-- ;  //任务延时变量处理
+    }
+	if (Manual_task_Delay != 0 )
+    {
+        Manual_task_Delay-- ; //任务延时变量处理
+    }
+	if (Flight_task_Delay != 0 )
+    {
+        Flight_task_Delay-- ; //任务延时变量处理
+    }
+	if (Tuning_task_Delay != 0 )
+    {
+        Tuning_task_Delay-- ; //任务延时变量处理
+    }
+	if (Fault_task_Delay != 0 )
+    {
+        Fault_task_Delay-- ; //任务延时变量处理
+    }
 	base_timer_isr();
+	
 }
 
 /******************************************************************************/

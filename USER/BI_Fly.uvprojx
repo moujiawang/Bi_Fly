@@ -365,7 +365,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_MD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\USER;..\CORE;..\STM32F10x_FWLib\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\HARDWARE\DTU;..\HARDWARE\IMU;..\HARDWARE\MPU6050;..\HARDWARE\UARTs;..\HARDWARE;..\HARDWARE\IIC;..\HARDWARE\EEPROM;..\HARDWARE\BaseTimer;..\HARDWARE\NRF24L01;..\nrf_protocol;..\HARDWARE\SPI;..\HARDWARE\Motor;..\nrf_protocol;..\PID</IncludePath>
+              <IncludePath>..\USER;..\CORE;..\STM32F10x_FWLib\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\HARDWARE\DTU;..\HARDWARE\IMU;..\HARDWARE\MPU6050;..\HARDWARE\UARTs;..\HARDWARE;..\HARDWARE\IIC;..\HARDWARE\EEPROM;..\HARDWARE\BaseTimer;..\HARDWARE\NRF24L01;..\nrf_protocol;..\HARDWARE\SPI;..\HARDWARE\Motor;..\nrf_protocol;..\PID;..\TASK</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -657,6 +657,21 @@
               <FileName>IncPID.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\PID\IncPID.c</FilePath>
+            </File>
+            <File>
+              <FileName>attitude_pid.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\PID\attitude_pid.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>TASK</GroupName>
+          <Files>
+            <File>
+              <FileName>task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\TASK\task.c</FilePath>
             </File>
           </Files>
         </Group>

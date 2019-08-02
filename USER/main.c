@@ -8,7 +8,7 @@
 #include <string.h>
 #include "upload_state_machine.h"
 #include "IncPID.h"
-
+#include "task.h"
 
 
 volatile uint32_t Last_count = 0;
@@ -20,29 +20,43 @@ volatile uint8_t Channel_status = End;
 volatile uint8_t Receive_complete_flag = 0;
 volatile uint8_t Receive_Wrong_flag = 0;
 //while loop time control flag，when Do_flag = 0，while loop can execute
-volatile uint8_t Do_Flag = 0;											
+volatile uint8_t Do_Flag = 0;	
 
+u8 Rx_buf[RX_PLOAD_WIDTH] = {0};
+u8 Tx_buf[TX_PLOAD_WIDTH] = {0};
 
 u16 T = 0;
 //u16 t=0;	
-u8 Rx_buf[RX_PLOAD_WIDTH] = {0};
-u8 Tx_buf[TX_PLOAD_WIDTH] = {0};
+
 u8 RX_Result;
 u8 TX_Result;
 u8 Mode_Id;
- 
+
+
 SYS_STATUS SYS_Status;
 
 TX_FLAG Tx_Flag = TX_WAIT;		
 
-#define MODE_STATUS (SYS_Status.DTU_NRF_Status & 0x38)
+#define START_TASK_DELAY 20
+#define MANUAL_TASK_DELAY 50
+#define FLIGHT_TASK_DELAY 50
+#define TUNING_TASK_DELAY 25
+#define FAULT_TASK_DELAY 50
+
+u8 Start_task_Delay = START_TASK_DELAY;
+u8 Manual_task_Delay = MANUAL_TASK_DELAY;
+u8 Flight_task_Delay = FLIGHT_TASK_DELAY;
+u8 Tuning_task_Delay = TUNING_TASK_DELAY;
+u8 Fault_task_Delay = FAULT_TASK_DELAY;
+
+
 
 int main(void)
 {
 	u8 sta_tmp = 0;
 	u8 rx_len = 0;
 
-	Mode_init(&SYS_Status);
+//	Mode_init(&SYS_Status);
 	delay_init();
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
@@ -67,12 +81,11 @@ int main(void)
 		if(rx_len != 0x00)
 		{
 			SYS_Status.DTU_NRF_Status |= NRF_CONNECTED;
-			
 			break;
 		}
 	}
-	while(1);//只有当NRF24L01在线并且通讯正常时才会跳过此循环						//直至握手成功后，退出循环
-	SYS_Status.DTU_NRF_Status |= START_MODE;										//模式信息更新为 START MODE
+	while(1);//只有当NRF24L01在线并且通讯正常时才会跳过此循环							//直至握手成功后，退出循环
+	SYS_Status.DTU_NRF_Status |= START_MODE;				 						//模式信息更新为 START MODE
 	
 	
 /*	while(Receive_complete_flag == 0 )												//等待DTU第一次握手
@@ -100,45 +113,37 @@ int main(void)
 */
 	while(1)
 	{
-		//////////////////IMU////////////////////
-		imu_fusion_do_run(&SYS_Status.imu_fusion_module);
-		/////////////////////////////////////////
-		if(Tx_Flag == TX_GO)
+/*		if(UpdateIMU_task_Delay == 0)									//更新了IMU的值：角速度，角度，而且根据应答的数据更新了模式ID,以及对模式下的指令参数
 		{
-			Command_patch(Tx_buf, &SYS_Status, MODE_STATUS);		//打包数据，更新Tx_buf，准备发送
-			rx_len = NRF24L01_Tx_ACKwithpayload(Tx_buf, Rx_buf);
-			if((rx_len>0)&&(rx_len<33))
-			{	
-				//刷新状态标志和模式信息
-				SYS_Status.DTU_NRF_Status |= NRF_CONNECTED;
-				Command_dispatch(Rx_buf,&SYS_Status);
-			}
-			else
-			{
-				SYS_Status.DTU_NRF_Status &= (~NRF_CONNECTED);
-				NRF24L01_FlushTX();
-				if(NRF24L01_Check())
-				{
-					SYS_Status.DTU_NRF_Status |= FAULT_MODE;
-				}
-			}
-																
-		}
+			UpdateIMU_task(&SYS_Status);
+		}*/
+		
 		switch(MODE_STATUS)
 		{
 			case START_MODE:
 			{
-				//init_motor();
-			};break;
-			case ACTUATOR_MODE:Actuator_command(&SYS_Status.Actuator_Status);break;
-			case MOTION_MODE  :Motion_command(&SYS_Status.Motion_Status);break;
-			case PID_MODE     :PID_command(&SYS_Status);break;
-			case FAULT_MODE   :
+				if(Start_task_Delay == 0)
+				{
+					Start_task(&SYS_Status);
+					Start_task_Delay = START_TASK_DELAY;
+				}					
+			}break;
+			case MANUAL_MODE:
+			{
+				if(Manual_task_Delay == 0)
+				{
+					Manual_task(&SYS_Status);
+					Manual_task_Delay = MANUAL_TASK_DELAY;
+				}
+			}break;
+			case FLIGHT_MODE:Motion_command(&SYS_Status.Flight_Status);break;
+			case TUNING_MODE:PID_command(&SYS_Status);break;
+			case FAULT_MODE:
 			{
 				if(NRF24L01_Check())
-						SYS_Status.DTU_NRF_Status &= NRF_OFF;
+					SYS_Status.DTU_NRF_Status &= NRF_OFF;
 				else
-						SYS_Status.DTU_NRF_Status |= NRF_ON;
+					SYS_Status.DTU_NRF_Status |= NRF_ON;
 				
 				Command_patch(Tx_buf, &SYS_Status, MODE_STATUS);		//打包数据，更新Tx_buf，准备发送
 				do

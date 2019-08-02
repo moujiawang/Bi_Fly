@@ -235,13 +235,13 @@ void MPU6050_getMotion6(int16_t* ax, int16_t* ay, int16_t* az, int16_t* gx, int1
 	*gy = MPU6050_FIFO[4][10]-Gy_offset;
 	*gz = MPU6050_FIFO[5][10]-Gz_offset;
 	} else {
-	*ax = MPU6050_FIFO[0][10];//=MPU6050_FIFO[0][10];
-	*ay = MPU6050_FIFO[1][10];//=MPU6050_FIFO[1][10];
-	*az = MPU6050_FIFO[2][10];//=MPU6050_FIFO[2][10];
+	*ax = MPU6050_FIFO[0][10];			//=MPU6050_FIFO[0][10];
+	*ay = MPU6050_FIFO[1][10];			//=MPU6050_FIFO[1][10];
+	*az = MPU6050_FIFO[2][10];			//=MPU6050_FIFO[2][10];
 	*gx = MPU6050_FIFO[3][10]-Gx_offset;//=MPU6050_FIFO[3][10];
 	*gy = MPU6050_FIFO[4][10]-Gy_offset;//=MPU6050_FIFO[4][10];
 	*gz = MPU6050_FIFO[5][10]-Gz_offset;//=MPU6050_FIFO[5][10];
-	}
+	} 
 }
 
 void MPU6050_getlastMotion6(int16_t* ax, int16_t* ay, 

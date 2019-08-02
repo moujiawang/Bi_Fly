@@ -1,6 +1,7 @@
 #include "nrf_protocol.h"
 
-static ACTUATOR_STATUS actuator_control;
+
+/*static MANUAL_STATUS actuator_control;
 static MOTION_STATUS motion_control;
 
 const ACTUATOR_STATUS* GetActuatorControl()
@@ -8,7 +9,7 @@ const ACTUATOR_STATUS* GetActuatorControl()
     return &actuator_control;
 }
 
-void SetActuatorControl(const ACTUATOR_STATUS* input)
+void SetActuatorControl(const MANUAL_STATUS* input)
 {
     actuator_control = *input;
 }
@@ -21,5 +22,5 @@ const MOTION_STATUS* GetMotionControl()
 void SetMotionControl(const MOTION_STATUS* input)
 {
     motion_control = *input;
-}
+}*/
 //end of file

@@ -287,7 +287,7 @@ if(ex != 0.0f && ey != 0.0f && ez != 0.0f){
 输出参数：没有
 *******************************************************************************/
 
-void IMU_getQ(OrientationEstimator* estimator, float * q) {
+void IMU_getQ(OrientationEstimator* estimator, float * q,float *angle_velocity) {
 float mygetqval[9];	//用于存放传感器转换结果的数组
 IMU_getValues(mygetqval);	 
   //将陀螺仪的测量值转成弧度每秒
@@ -307,6 +307,10 @@ IMU_AHRSupdate(estimator,
   q[1] = estimator->q1;
   q[2] = estimator->q2;
   q[3] = estimator->q3;
+	
+  angle_velocity[0] =  mygetqval[3]; //返回角速度值
+  angle_velocity[1] =  mygetqval[4];
+  angle_velocity[2] =  mygetqval[5];
 }
 
 
@@ -316,10 +320,10 @@ IMU_AHRSupdate(estimator,
 输入参数： 将要存放姿态角的数组首地址
 输出参数：没有
 *******************************************************************************/
-void IMU_getYawPitchRoll(OrientationEstimator* estimator, float *angles) {
+void IMU_getYawPitchRoll(OrientationEstimator* estimator, float *angles, float *angle_velocity) {
   float q[4]; //　四元数
   volatile float gx=0.0, gy=0.0, gz=0.0; //估计重力方向
-  IMU_getQ(estimator, q); //更新全局四元数
+  IMU_getQ(estimator, q, angle_velocity); //更新全局四元数和角速度值
   
   angles[0] = -atan2(2 * q[1] * q[2] + 2 * q[0] * q[3], -2 * q[2]*q[2] - 2 * q[3] * q[3] + 1)* 180/M_PI; //yaw
   angles[1] = -asin(-2 * q[1] * q[3] + 2 * q[0] * q[2])* 180/M_PI; //pitch
@@ -342,7 +346,7 @@ void imu_fusion_init(IMUFusion* imu_fusion_module)
 #include "base_timer.h"
 void imu_fusion_do_run(IMUFusion* imu_fusion_module)
 {
-	IMU_getYawPitchRoll(&imu_fusion_module->estimator, imu_fusion_module->ypr); //姿态更新
+	IMU_getYawPitchRoll(&imu_fusion_module->estimator, imu_fusion_module->ypr, imu_fusion_module->ypr_rate); //姿态更新
 	imu_fusion_module->math_hz++; //解算次数 ++
 //	base_timer_get_us();
 //	SysTick->VAL;

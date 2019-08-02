@@ -15,7 +15,7 @@
 void imu_fusion_init(IMUFusion* imu_fusion);
 void imu_fusion_do_run(IMUFusion* imu_fusion);
 void IMU_init(OrientationEstimator* estimator); //初始化
-void IMU_getYawPitchRoll(OrientationEstimator* estimator, float * ypr); //更新姿态
+void IMU_getYawPitchRoll(OrientationEstimator* estimator, float *angles, float *angle_velocity);//更新姿态
 uint32_t micros(void);	//读取系统上电后的时间  单位 us 
 
 #endif
