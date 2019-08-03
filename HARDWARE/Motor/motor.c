@@ -222,20 +222,20 @@ void Command_manage(int32_t Command_length[],MANUAL_STATUS* Manual_Status)
 			case ROLL:
 			{
 			//俯仰--占空比设置
-				Actuator_Status->Roll_Pulse =  Control_Pulse;
-				TIM_SetCompare2(TIM2,Actuator_Status->Roll_Pulse);
+				Actuator_Status->RightServo_Pulse =  Control_Pulse;
+				TIM_SetCompare2(TIM2,Actuator_Status->RightServo_Pulse);
 			};break;
 			case PITCH:
 			{
 			//翻滚--占空比设置
-				Actuator_Status->Pitch_Pulse =  Control_Pulse;
-				TIM_SetCompare3(TIM2,Actuator_Status->Pitch_Pulse );
+				Actuator_Status->LeftServo_Pulse =  Control_Pulse;
+				TIM_SetCompare3(TIM2,Actuator_Status->LeftServo_Pulse );
 			};break;
 			case YAW:
 			{
 			//偏航--占空比设置
-				Actuator_Status->Yaw_Pulse = Control_Pulse;
-				TIM_SetCompare4(TIM2,Actuator_Status->Yaw_Pulse);
+				Actuator_Status->MidServo_Pulse = Control_Pulse;
+				TIM_SetCompare4(TIM2,Actuator_Status->MidServo_Pulse);
 			};break;
 			default:;break;
 		}
@@ -284,9 +284,9 @@ void Manual_command(const MANUAL_STATUS* Manual_status)
 		TIM_OCInitStruct.TIM_OutputState = TIM_OutputState_Disable;
 		TIM_OC3Init(TIM3, &TIM_OCInitStruct);
 	}
-	TIM_SetCompare2(TIM2,Manual_status->Roll_Pulse);						//刷新翻滚控制舵机占空比
-	TIM_SetCompare3(TIM2,Manual_status->Pitch_Pulse);						//刷新俯仰控制舵机占空比
-	TIM_SetCompare4(TIM2,Manual_status->Yaw_Pulse);							//刷新偏航控制舵机占空比
+	TIM_SetCompare2(TIM2,Manual_status->RightServo_Pulse);						//刷新翻滚控制舵机占空比
+	TIM_SetCompare3(TIM2,Manual_status->LeftServo_Pulse);						//刷新俯仰控制舵机占空比
+	TIM_SetCompare4(TIM2,Manual_status->MidServo_Pulse);							//刷新偏航控制舵机占空比
 }
 
 void Flight_command(const FLIGHT_STATUS* Flight_Status)
@@ -297,19 +297,39 @@ void Flight_command(const FLIGHT_STATUS* Flight_Status)
 
 void PID_command(SYS_STATUS *SYS_status)
 {
-	YPR_ID pid_id = 0;
-	uint16_t inc_output = 0;
+	YPR_ID pid_id;
 	pid_id = SYS_status->PID_Paras.PID_id;
 	attitudeAnglePID(&SYS_status->PID_Paras,&SYS_status->imu_fusion_module);	/* 角度环PID */	
 	attitudeRatePID(&SYS_status->PID_Paras,&SYS_status->imu_fusion_module);		/* 角速度环PID */
 	
+	switch(pid_id)
+	{
+		case YAW:
+			SYS_status->Manual_Status.MidServo_Pulse += SYS_status->PID_Paras.PID_YPR_para[YAW][RATE].PIDcal_Out;
+			;break;
+		case PITCH:
+			{
+				SYS_status->Manual_Status.LeftServo_Pulse += SYS_status->PID_Paras.PID_YPR_para[PITCH][RATE].PIDcal_Out;
+				SYS_status->Manual_Status.RightServo_Pulse -= SYS_status->PID_Paras.PID_YPR_para[PITCH][RATE].PIDcal_Out;
+			}break;
+		case ROLL:
+			{
+				SYS_status->Manual_Status.LeftServo_Pulse += SYS_status->PID_Paras.PID_YPR_para[ROLL][RATE].PIDcal_Out;
+				SYS_status->Manual_Status.RightServo_Pulse += SYS_status->PID_Paras.PID_YPR_para[ROLL][RATE].PIDcal_Out;
+			}break;
+		case ALL:
+			{
+				SYS_status->Manual_Status.MidServo_Pulse += SYS_status->PID_Paras.PID_YPR_para[YAW.][RATE].PIDcal_Out;
+				SYS_status->Manual_Status.LeftServo_Pulse += SYS_status->PID_Paras.PID_YPR_para[PITCH][RATE].PIDcal_Out 
+															+ SYS_status->PID_Paras.PID_YPR_para[ROLL][RATE].PIDcal_Out;
+				SYS_status->Manual_Status.RightServo_Pulse += SYS_status->PID_Paras.PID_YPR_para[ROLL][RATE].PIDcal_Out 
+															- SYS_status->PID_Paras.PID_YPR_para[PITCH][RATE].PIDcal_Out;
+			}break;
+	}
 	//执行机构赋值
-	SYS_status->Manual_Status.Yaw_Pulse = SYS_status->PID_Paras.PID_YPR_para[YAW][RATE].PIDcal_Out;
-	SYS_status->Manual_Status.Pitch_Pulse = SYS_status->PID_Paras.PID_YPR_para[PITCH][RATE].PIDcal_Out - SYS_status->PID_Paras.PID_YPR_para[ROLL][RATE].PIDcal_Out;
-	SYS_status->Manual_Status.Roll_Pulse = SYS_status->PID_Paras.PID_YPR_para[PITCH][RATE].PIDcal_Out + SYS_status->PID_Paras.PID_YPR_para[ROLL][RATE].PIDcal_Out;
+	
 	SYS_status->Manual_Status.Fly_Pulse = 100;
 	SYS_status->Manual_Status.Climb_Pulse = 0;
-	
 	Manual_command(&SYS_status->Manual_Status );
 }
   

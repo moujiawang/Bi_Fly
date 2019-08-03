@@ -17,9 +17,9 @@
 void Manual_assignment(const u8 *rx_buff, MANUAL_STATUS *Manual_status)
 {
 
-	Manual_status->Yaw_Pulse = *(rx_buff + 1);
-	Manual_status->Pitch_Pulse = *(rx_buff + 2);
-	Manual_status->Roll_Pulse = *(rx_buff + 3);
+	Manual_status->MidServo_Pulse = *(rx_buff + 1);
+	Manual_status->LeftServo_Pulse = *(rx_buff + 2);
+	Manual_status->RightServo_Pulse = *(rx_buff + 3);
 	Manual_status->Fly_Pulse = *(rx_buff + 4);
 	Manual_status->Climb_Pulse = *(rx_buff + 5);
 
@@ -111,9 +111,9 @@ void Fault_assignment(const u8 *rx_buff, SYS_STATUS *SYS_status)
 ============================================================================*/
 void Start_assignment(const u8 *rx_buff, SYS_STATUS *SYS_status)
 {
-	SYS_status->Manual_Status.Yaw_Pulse = *(rx_buff + 1);
-	SYS_status->Manual_Status.Pitch_Pulse = *(rx_buff + 2);
-	SYS_status->Manual_Status.Roll_Pulse = *(rx_buff + 3);
+	SYS_status->Manual_Status.MidServo_Pulse = *(rx_buff + 1);
+	SYS_status->Manual_Status.LeftServo_Pulse = *(rx_buff + 2);
+	SYS_status->Manual_Status.RightServo_Pulse = *(rx_buff + 3);
 }
 
 
@@ -188,9 +188,9 @@ void Command_patch(u8 *tx_buff, SYS_STATUS *SYS_status, u8 mode_id)
 		*(u16 *)&tx_buff[11] = (u16)(SYS_status->imu_fusion_module.ypr_rate[ROLL]);
 		*(uint32_t *)&tx_buff[13] = SYS_status->imu_fusion_module.system_micrsecond;
 		*(tx_buff + 17) = SYS_status->DTU_NRF_Status;
-		*(tx_buff + 18) = SYS_status->Manual_Status.Yaw_Pulse;
-		*(tx_buff + 19) = SYS_status->Manual_Status.Pitch_Pulse;
-		*(tx_buff + 20) = SYS_status->Manual_Status.Roll_Pulse;
+		*(tx_buff + 18) = SYS_status->Manual_Status.MidServo_Pulse;
+		*(tx_buff + 19) = SYS_status->Manual_Status.LeftServo_Pulse;
+		*(tx_buff + 20) = SYS_status->Manual_Status.RightServo_Pulse;
 		*(tx_buff + 21) = SYS_status->Manual_Status.Fly_Pulse;
 		*(tx_buff + 22) = SYS_status->Manual_Status.Climb_Pulse;
 	}
@@ -205,9 +205,9 @@ void Command_patch(u8 *tx_buff, SYS_STATUS *SYS_status, u8 mode_id)
 		*(u16 *)&tx_buff[11] = (u16)(SYS_status->imu_fusion_module.ypr_rate[ROLL]);
 		*(uint32_t *)&tx_buff[13] = SYS_status->imu_fusion_module.system_micrsecond;
 		*(tx_buff + 17) = SYS_status->DTU_NRF_Status;
-		*(tx_buff + 18) = SYS_status->Manual_Status.Yaw_Pulse;
-		*(tx_buff + 19) = SYS_status->Manual_Status.Pitch_Pulse;
-		*(tx_buff + 20) = SYS_status->Manual_Status.Roll_Pulse;
+		*(tx_buff + 18) = SYS_status->Manual_Status.MidServo_Pulse;
+		*(tx_buff + 19) = SYS_status->Manual_Status.LeftServo_Pulse;
+		*(tx_buff + 20) = SYS_status->Manual_Status.RightServo_Pulse;
 		*(tx_buff + 21) = SYS_status->Manual_Status.Fly_Pulse;
 		*(tx_buff + 22) = SYS_status->Manual_Status.Climb_Pulse;
 	}
@@ -222,9 +222,9 @@ void Command_patch(u8 *tx_buff, SYS_STATUS *SYS_status, u8 mode_id)
 		*(u16 *)&tx_buff[11] = (u16)(SYS_status->imu_fusion_module.ypr_rate[ROLL]);
 		*(uint32_t *)&tx_buff[13] = SYS_status->imu_fusion_module.system_micrsecond;
 		*(tx_buff + 17) = SYS_status->DTU_NRF_Status;
-		*(tx_buff + 18) = SYS_status->Manual_Status.Yaw_Pulse;
-		*(tx_buff + 19) = SYS_status->Manual_Status.Pitch_Pulse;
-		*(tx_buff + 20) = SYS_status->Manual_Status.Roll_Pulse;
+		*(tx_buff + 18) = SYS_status->Manual_Status.MidServo_Pulse;
+		*(tx_buff + 19) = SYS_status->Manual_Status.LeftServo_Pulse;
+		*(tx_buff + 20) = SYS_status->Manual_Status.RightServo_Pulse;
 		*(tx_buff + 21) = SYS_status->Manual_Status.Fly_Pulse;
 		*(tx_buff + 22) = SYS_status->Manual_Status.Climb_Pulse;
 	}
@@ -239,9 +239,9 @@ void Command_patch(u8 *tx_buff, SYS_STATUS *SYS_status, u8 mode_id)
 		*(u16 *)&tx_buff[11] = (u16)(SYS_status->imu_fusion_module.ypr_rate[ROLL]);
 		*(uint32_t *)&tx_buff[13] = SYS_status->imu_fusion_module.system_micrsecond;
 		*(tx_buff + 17) = SYS_status->DTU_NRF_Status;
-		*(tx_buff + 18) = SYS_status->Manual_Status.Yaw_Pulse;
-		*(tx_buff + 19) = SYS_status->Manual_Status.Pitch_Pulse;
-		*(tx_buff + 20) = SYS_status->Manual_Status.Roll_Pulse;
+		*(tx_buff + 18) = SYS_status->Manual_Status.MidServo_Pulse;
+		*(tx_buff + 19) = SYS_status->Manual_Status.LeftServo_Pulse;
+		*(tx_buff + 20) = SYS_status->Manual_Status.RightServo_Pulse;
 		*(tx_buff + 21) = SYS_status->Manual_Status.Fly_Pulse;
 		*(tx_buff + 22) = SYS_status->Manual_Status.Climb_Pulse;
 		*(u16 *)&tx_buff[23] = (u16)(SYS_status->PID_Paras.PID_YPR_para[pid_id][ANGLE].Error);

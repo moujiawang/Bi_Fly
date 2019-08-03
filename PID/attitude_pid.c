@@ -24,10 +24,12 @@ void attitudeRatePID(PID_PARAS * pid_paras, IMUFusion * imu_data)	/* 角速度环PID
 /**************************************************************/
 void attitudeAnglePID(PID_PARAS * pid_paras, IMUFusion * imu_data)	/* 角度环PID */
 {
+	float yawError =  0;
 	pid_paras->PID_YPR_para[PITCH][RATE].SetPoint = PID_Update(&pid_paras->PID_YPR_para[PITCH][ANGLE], pid_paras->PID_YPR_para[PITCH][ANGLE].SetPoint - imu_data->ypr[PITCH]);
 	pid_paras->PID_YPR_para[ROLL][RATE].SetPoint = PID_Update(&pid_paras->PID_YPR_para[ROLL][ANGLE], pid_paras->PID_YPR_para[ROLL][ANGLE].SetPoint - imu_data->ypr[ROLL]);
 	
-	float yawError =  pid_paras->PID_YPR_para[YAW][ANGLE].SetPoint -  imu_data->ypr[YAW];
+
+		yawError = pid_paras->PID_YPR_para[YAW][ANGLE].SetPoint -  imu_data->ypr[YAW];
 	if (yawError > 180.0f) 
 		yawError -= 360.0f;
 	else if (yawError < -180.0) 

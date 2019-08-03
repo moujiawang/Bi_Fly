@@ -38,6 +38,39 @@ void load_config(void){
 		Config.dMx_scale =1.0f;
 		Config.dMy_scale =1.0f;
 		Config.dMz_scale =1.0f;
+//ROLL
+		Config.Kp_ROLL_RATE = 1.0f;					
+		Config.Ki_ROLL_RATE = 1.0f;
+		Config.Kd_ROLL_RATE = 1.0f;
+		Config.Limit_ROLL_RATE = 1.0f;       		//output limit MAX
+		Config.LimitLow_ROLL_RATE = 1.0f;    		//output limit MIN
+		Config.Kp_ROLL_ANGLE = 1.0f;					
+		Config.Ki_ROLL_ANGLE = 1.0f;
+		Config.Kd_ROLL_ANGLE = 1.0f;
+		Config.Limit_ROLL_ANGLE = 1.0f;       		//output limit MAX
+		Config.LimitLow_ROLL_ANGLE = 1.0f;    		//output limit MIN
+//YAW
+		Config.Kp_YAW_RATE = 1.0f;					
+		Config.Ki_YAW_RATE = 1.0f;
+		Config.Kd_YAW_RATE = 1.0f;
+		Config.Limit_YAW_RATE = 1.0f;       		//output limit MAX
+		Config.LimitLow_YAW_RATE = 1.0f;    		//output limit MIN
+		Config.Kp_YAW_ANGLE = 1.0f;					
+		Config.Ki_YAW_ANGLE = 1.0f;
+		Config.Kd_YAW_ANGLE = 1.0f;
+		Config.Limit_YAW_ANGLE = 1.0f;       		//output limit MAX
+		Config.LimitLow_YAW_ANGLE = 1.0f;    		//output limit MIN
+//PITCH	
+		Config.Kp_PITCH_RATE = 1.0f;	
+		Config.Ki_PITCH_RATE = 1.0f;
+		Config.Kd_PITCH_RATE = 1.0f;
+		Config.Limit_PITCH_RATE = 1.0f;       		//output limit MAX
+		Config.LimitLow_PITCH_RATE = 1.0f;    		//output limit MIN
+		Config.Kp_PITCH_ANGLE = 1.0f;					
+		Config.Ki_PITCH_ANGLE = 1.0f;
+		Config.Kd_PITCH_ANGLE = 1.0f;
+		Config.Limit_PITCH_ANGLE = 1.0f;       		//output limit MAX
+		Config.LimitLow_PITCH_ANGLE = 1.0f;    		//output limit MIN
 	
 		Write_config();	 //将默认值写入flash
 	}

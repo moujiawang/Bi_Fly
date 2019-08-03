@@ -43,9 +43,9 @@ typedef struct
 
 typedef struct
 { 
-	uint8_t Roll_Pulse;
-	uint8_t Pitch_Pulse;
-	uint8_t Yaw_Pulse;
+	uint8_t RightServo_Pulse;
+	uint8_t LeftServo_Pulse;
+	uint8_t MidServo_Pulse;
 	uint8_t Fly_Pulse;
 	uint8_t Climb_Pulse;
 	uint8_t Control_Status;

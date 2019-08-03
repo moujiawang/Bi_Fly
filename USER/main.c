@@ -53,7 +53,7 @@ u8 Fault_task_Delay = FAULT_TASK_DELAY;
 
 int main(void)
 {
-	u8 sta_tmp = 0;
+//	u8 sta_tmp = 0;
 	u8 rx_len = 0;
 
 //	Mode_init(&SYS_Status);
@@ -84,7 +84,7 @@ int main(void)
 			break;
 		}
 	}
-	while(1);//只有当NRF24L01在线并且通讯正常时才会跳过此循环							//直至握手成功后，退出循环
+	while(1);//只有当NRF24L01在线并且通讯正常时才会跳过此循环						//直至握手成功后，退出循环
 	SYS_Status.DTU_NRF_Status |= START_MODE;				 						//模式信息更新为 START MODE
 	
 	
@@ -125,7 +125,7 @@ int main(void)
 				if(Start_task_Delay == 0)
 				{
 					Start_task(&SYS_Status);
-					Start_task_Delay = START_TASK_DELAY;
+					Start_task_Delay = Start_task_Delay;
 				}					
 			}break;
 			case MANUAL_MODE:
@@ -133,11 +133,20 @@ int main(void)
 				if(Manual_task_Delay == 0)
 				{
 					Manual_task(&SYS_Status);
-					Manual_task_Delay = MANUAL_TASK_DELAY;
+					Manual_task_Delay = Manual_task_Delay;
 				}
 			}break;
-			case FLIGHT_MODE:Motion_command(&SYS_Status.Flight_Status);break;
-			case TUNING_MODE:PID_command(&SYS_Status);break;
+			case FLIGHT_MODE:
+				//Flight_command(&SYS_Status.Flight_Status);
+				break;
+			case TUNING_MODE:
+			{
+				if(Tuning_task_Delay == 0)
+				{
+					Tuning_task(&SYS_Status);
+					Tuning_task_Delay = Tuning_task_Delay;
+				}
+			};break;
 			case FAULT_MODE:
 			{
 				if(NRF24L01_Check())

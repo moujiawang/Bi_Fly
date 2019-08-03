@@ -7,3 +7,4 @@ void attitudeRatePID(PID_PARAS * pid_paras, IMUFusion * imu_data);	/* 角速度环PI
 void attitudeAnglePID(PID_PARAS * pid_paras, IMUFusion * imu_data);	/* 角度环PID */
 
 #endif
+
