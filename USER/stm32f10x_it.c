@@ -134,17 +134,23 @@ void PendSV_Handler(void)
   */
 #include "base_timer.h"
 
-extern u8 Start_task_Delay;
-extern u8 Manual_task_Delay;
-extern u8 Flight_task_Delay;
-extern u8 Tuning_task_Delay;
-extern u8 Fault_task_Delay;
+extern uint16_t Start_task_Delay;
+extern uint16_t Manual_task_Delay;
+extern uint16_t Flight_task_Delay;
+extern uint16_t Tuning_task_Delay;
+extern uint16_t Fault_task_Delay;
+extern uint8_t IMU_update_Delay;
 
 void SysTick_Handler(void)
 {
 	if (Start_task_Delay != 0 )
     {
         Start_task_Delay-- ;  //任务延时变量处理
+    }
+
+	if (Start_task_Delay != 0 )
+    {
+        Start_task_Delay = Start_task_Delay;  //任务延时变量处理
     }
 	if (Manual_task_Delay != 0 )
     {
@@ -158,10 +164,18 @@ void SysTick_Handler(void)
     {
         Tuning_task_Delay-- ; //任务延时变量处理
     }
+	else
+	{
+		Tuning_task_Delay = Tuning_task_Delay;
+	}
 	if (Fault_task_Delay != 0 )
     {
         Fault_task_Delay-- ; //任务延时变量处理
     }
+	if(IMU_update_Delay != 0)
+	{
+		IMU_update_Delay--;//陀螺仪任务延时处理
+	}
 	base_timer_isr();
 	
 }

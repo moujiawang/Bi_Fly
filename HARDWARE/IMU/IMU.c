@@ -12,6 +12,7 @@
  */
 
 #include "IMU.h"
+#include "base_timer.h"
 
 //volatile float estimator->ex_inte, estimator->ey_inte, estimator->ez_inte;  // 误差积分
 // volatile float q0, q1, q2, q3; // 全局四元数
@@ -201,18 +202,19 @@ void IMU_AHRSupdate(OrientationEstimator* estimator, float gx, float gy, float g
   
   now = micros();  //读取时间
   if(now<lastUpdate){ //定时器溢出过了。
-  halfT =  ((float)(now + (0xffff- lastUpdate)) / 2000000.0f);
+  halfT =  ((float)(now + (0xffff- lastUpdate)) / 2000000.0f);		//halfT的时间单位是S
   }
   else	{
   halfT =  ((float)(now - lastUpdate) / 2000000.0f);
   }
   lastUpdate = now;	//更新时间
-
+  
+  //把加速度计的三维向量转成单位向量。
   norm = invSqrt(ax*ax + ay*ay + az*az);       
   ax = ax * norm;
   ay = ay * norm;
   az = az * norm;
-  //把加计的三维向量转成单位向量。
+
 
 //  norm = invSqrt(mx*mx + my*my + mz*mz);          
 //  mx = mx * norm;
@@ -232,6 +234,7 @@ void IMU_AHRSupdate(OrientationEstimator* estimator, float gx, float gy, float g
 //  bz = hz;     
   
   // estimated direction of gravity and flux (v and w)
+  //在当前的四元数机体坐标参考系上换算出重力单位向量，这个重力向量相当于是之前陀螺仪积分后的姿态推算出来的重力向量
   vx = 2*(q1q3 - q0q2);
   vy = 2*(q0q1 + q2q3);
   vz = q0q0 - q1q1 - q2q2 + q3q3;
@@ -244,8 +247,8 @@ void IMU_AHRSupdate(OrientationEstimator* estimator, float gx, float gy, float g
 //  ey = (az*vx - ax*vz) + (mz*wx - mx*wz);
 //  ez = (ax*vy - ay*vx) + (mx*wy - my*wx);
 	ex = (ay*vz - az*vy);
-  ey = (az*vx - ax*vz);
-  ez = (ax*vy - ay*vx);
+	ey = (az*vx - ax*vz);
+	ez = (ax*vy - ay*vx);
 
   /*
   axyz是机体坐标参照系上，加速度计测出来的重力向量，也就是实际测出来的重力向量。
@@ -308,9 +311,9 @@ IMU_AHRSupdate(estimator,
   q[2] = estimator->q2;
   q[3] = estimator->q3;
 	
-  angle_velocity[0] =  mygetqval[3]; //返回角速度值
+  angle_velocity[2] =  mygetqval[3]; //返回角速度值
   angle_velocity[1] =  mygetqval[4];
-  angle_velocity[2] =  mygetqval[5];
+  angle_velocity[0] =  mygetqval[5];
 }
 
 
@@ -325,8 +328,8 @@ void IMU_getYawPitchRoll(OrientationEstimator* estimator, float *angles, float *
   volatile float gx=0.0, gy=0.0, gz=0.0; //估计重力方向
   IMU_getQ(estimator, q, angle_velocity); //更新全局四元数和角速度值
   
-  angles[0] = -atan2(2 * q[1] * q[2] + 2 * q[0] * q[3], -2 * q[2]*q[2] - 2 * q[3] * q[3] + 1)* 180/M_PI; //yaw
-  angles[1] = -asin(-2 * q[1] * q[3] + 2 * q[0] * q[2])* 180/M_PI; //pitch
+  angles[0] = atan2(2 * q[1] * q[2] + 2 * q[0] * q[3], -2 * q[2]*q[2] - 2 * q[3] * q[3] + 1)* 180/M_PI; //yaw
+  angles[1] = asin(-2 * q[1] * q[3] + 2 * q[0] * q[2])* 180/M_PI; //pitch
   angles[2] = atan2(2 * q[2] * q[3] + 2 * q[0] * q[1], -2 * q[1] * q[1] - 2 * q[2] * q[2] + 1)* 180/M_PI; //roll
   //if(angles[0]<0)angles[0]+=360.0f;  //将 -+180度  转成0-360度
 }
@@ -340,7 +343,7 @@ void imu_fusion_init(IMUFusion* imu_fusion_module)
 	IIC_Init();	 	//初始化I2C接口
 	delay_ms(300);	//等待器件上电
 	IMU_init(&imu_fusion_module->estimator); //初始化IMU和传感器
-	imu_fusion_module->system_micrsecond = micros();
+	imu_fusion_module->system_micrsecond =  micros();
 }
 
 #include "base_timer.h"

@@ -36,21 +36,31 @@ typedef struct
 	OrientationEstimator estimator;
 	float ypr[3];
 	float ypr_rate[3];
-	uint32_t system_micrsecond;
+	uint64_t system_micrsecond;
 	u8 upload_state;
 	int16_t math_hz;
 }IMUFusion;
 
 typedef struct
 { 
-	uint8_t RightServo_Pulse;
-	uint8_t LeftServo_Pulse;
-	uint8_t MidServo_Pulse;
+	u8 RightServo_Pulse;
+	u8 LeftServo_Pulse;
+	u8 MidServo_Pulse;
+	float RightServo_Out_Sum;
+	float LeftServo_Out_Sum;
+	float MidServo_Out_Sum;
 	uint8_t Fly_Pulse;
 	uint8_t Climb_Pulse;
 	uint8_t Control_Status;
 	uint8_t Fly_or_Climb_Status;
 	u8 test;
+	u8 RightServo_Limit;
+	u8 RightServo_LimitLow;
+	u8 LeftServo_Limit;
+	u8 LeftServo_LimitLow;	
+	u8 MidServo_Limit;
+	u8 MidServo_LimitLow;	
+	
 }MANUAL_STATUS;
 
 //typedef struct
@@ -84,11 +94,16 @@ typedef struct
 	float SetPoint;
 	float Limit;       		//output limit MAX
 	float LimitLow;    		//output limit MIN
+	float Kp_OUT_SUM;			//Kp_OUT(debugging)			
+	float Ki_OUT_SUM;			//Ki_OUT(debugging)	
+	float Kd_OUT_SUM;			//Kd_OUT(debugging)	
+	float PIDcal_Out_SUM;		////PIDcal_Out_SUM(debugging)
 }PID_PARA;
 
 typedef struct
 {
-	YPR_ID PID_id;
+	u8 PID_id;
+	uint16_t refresh_Hz;
 	PID_PARA PID_YPR_para[3][2];		
 }PID_PARAS;
 
@@ -102,9 +117,19 @@ typedef struct
 }SYS_STATUS;
 
 
+//上行数据长度
+#define FAULT_MODE_UPDATA_LENGTH  21
+#define START_MODE_UPDATA_LENGTH  23
+#define MANUAL_MODE_UPDATA_LENGTH 23
+#define FLIGHT_MODE_UPDATA_LENGTH 23
+#define TUNING_MODE_UPDATA_LENGTH 31
 
-
-
+//下行数据长度
+#define FAULT_MODE_DOWNDATA_LENGTH 1
+#define START_MODE_DOWNDATA_LENGTH  5
+#define MANUAL_MODE_DOWNDATA_LENGTH 6
+#define FLIGHT_MODE_DOWNDATA_LENGTH 23
+#define TUNING_MODE_DOWNDATA_LENGTH 24
 
 //NRF24L01 和 接收机是否在线标志号
 
@@ -116,16 +141,18 @@ typedef struct
 #define NRF_DISCONNECTED  0xFD					//NRF通讯失败
 #define DTU_OK            0x03					//DTU接收机通讯正常就表明在线，DTU无是否在线的检测标志位
 
+#define WRITE_FLASH_FLAG 0x40
 
+extern SYS_STATUS SYS_Status;
 
-#define MODE_STATUS (SYS_Status.DTU_NRF_Status & 0x38) 
+//#define MODE_STATUS (SYS_Status.DTU_NRF_Status & 0x38) 
 
 //u8 Mode_init(SYS_STATUS *SYS_status);
-u8 Command_dispatch(u8 *rx_buff, SYS_STATUS *SYS_status);
-void Command_patch(u8 *tx_buff, SYS_STATUS *SYS_status, u8 mode_id);
+u8 Command_dispatch(u8 *rx_buff, SYS_STATUS *SYS_status,u8 rx_len);
+u8 Command_patch(u8 *tx_buff, SYS_STATUS *SYS_status, u8 mode_id);
 void Manual_assignment(const u8 *rx_buff, MANUAL_STATUS *Actuator_status);
 void Flight_assignment(const u8 *rx_buff, FLIGHT_STATUS *Motion_status);
-void Tuning_assignment(const u8 *rx_buff, PID_PARAS *PID_paras);
+void Tuning_assignment(const u8 *rx_buff, SYS_STATUS *sys_status);
 void Start_assignment(const u8 *rx_buff, SYS_STATUS *SYS_status);
 	
 

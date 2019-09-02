@@ -1,15 +1,4 @@
-#include "stm32f10x.h"
-#include "delay.h"
-#include "nrf_protocol.h"
-#include "DTU.h"
-#include "motor.h"
-#include "24l01.h" 	
-#include <stdlib.h>
-#include <string.h>
-#include "upload_state_machine.h"
-#include "IncPID.h"
-#include "task.h"
-
+#include "system.h"
 
 volatile uint32_t Last_count = 0;
 volatile uint32_t New_count = 0;
@@ -37,45 +26,23 @@ SYS_STATUS SYS_Status;
 
 TX_FLAG Tx_Flag = TX_WAIT;		
 
-#define START_TASK_DELAY 20
-#define MANUAL_TASK_DELAY 50
-#define FLIGHT_TASK_DELAY 50
-#define TUNING_TASK_DELAY 25
-#define FAULT_TASK_DELAY 50
 
-u8 Start_task_Delay = START_TASK_DELAY;
-u8 Manual_task_Delay = MANUAL_TASK_DELAY;
-u8 Flight_task_Delay = FLIGHT_TASK_DELAY;
-u8 Tuning_task_Delay = TUNING_TASK_DELAY;
-u8 Fault_task_Delay = FAULT_TASK_DELAY;
+uint16_t Start_task_Delay = START_TASK_DELAY;
+uint16_t Manual_task_Delay = MANUAL_TASK_DELAY;
+uint16_t Flight_task_Delay = FLIGHT_TASK_DELAY;
+uint16_t Tuning_task_Delay = TUNING_TASK_DELAY;
+uint16_t Fault_task_Delay = FAULT_TASK_DELAY;
+uint8_t IMU_update_Delay = IMU_UPDATE_DALAY;
 
 
 
 int main(void)
 {
-//	u8 sta_tmp = 0;
-	u8 rx_len = 0;
-
-//	Mode_init(&SYS_Status);
-	delay_init();
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
-	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
-//	DTU_init();																		//数传模块初始化
-	motor_init();																	//电机控制定时器初始化
-	TIM_Cmd(TIM2, ENABLE);															//使能TIM2
-	TIM_Cmd(TIM3, ENABLE);															//使能TIM3
-	NRF24L01_Init(TX_MODE);    														//初始化NRF24L01为发送模式    
-	load_config();  																//从flash中读取配置信息 -->eeprom.c
-	Initial_UART1(115200L);															//初始化串口
-	IncPID_Init(&SYS_Status.PID_Paras);												//初始化PID参数
-	////////////////IMU/////////////////
-	imu_fusion_init(&SYS_Status.imu_fusion_module);
-	////////////////////////////////////
-	while( NRF24L01_Check() == 1);
-	SYS_Status.DTU_NRF_Status |= NRF_ON;											//有NRF在线,更新标志位
 	
-	Command_patch(Tx_buf, &SYS_Status, START_MODE);		                            //更新Tx_buf
-	do
+	System_init();
+
+	
+/*	do
 	{
 		rx_len = NRF24L01_Tx_ACKwithpayload(Tx_buf, Rx_buf);
 		if(rx_len != 0x00)
@@ -84,9 +51,9 @@ int main(void)
 			break;
 		}
 	}
-	while(1);//只有当NRF24L01在线并且通讯正常时才会跳过此循环						//直至握手成功后，退出循环
+	while(1);//只有当NRF24L01在线并且通讯正常时才会跳过此循环							//直至握手成功后，退出循环
 	SYS_Status.DTU_NRF_Status |= START_MODE;				 						//模式信息更新为 START MODE
-	
+*/	
 	
 /*	while(Receive_complete_flag == 0 )												//等待DTU第一次握手
 	{
@@ -113,19 +80,22 @@ int main(void)
 */
 	while(1)
 	{
-/*		if(UpdateIMU_task_Delay == 0)									//更新了IMU的值：角速度，角度，而且根据应答的数据更新了模式ID,以及对模式下的指令参数
+		if(IMU_update_Delay == 0)
 		{
-			UpdateIMU_task(&SYS_Status);
-		}*/
+			//////////////////IMU////////////////////
+			imu_fusion_do_run(&SYS_Status.imu_fusion_module);		//更新了角速度，角加速度
+			/////////////////////////////////////////
+			IMU_update_Delay = IMU_UPDATE_DALAY;
+		}
 		
-		switch(MODE_STATUS)
+		switch(SYS_Status.DTU_NRF_Status & 0x38)
 		{
 			case START_MODE:
 			{
 				if(Start_task_Delay == 0)
 				{
 					Start_task(&SYS_Status);
-					Start_task_Delay = Start_task_Delay;
+					Start_task_Delay = START_TASK_DELAY;
 				}					
 			}break;
 			case MANUAL_MODE:
@@ -133,7 +103,7 @@ int main(void)
 				if(Manual_task_Delay == 0)
 				{
 					Manual_task(&SYS_Status);
-					Manual_task_Delay = Manual_task_Delay;
+					Manual_task_Delay = MANUAL_TASK_DELAY;
 				}
 			}break;
 			case FLIGHT_MODE:
@@ -144,31 +114,19 @@ int main(void)
 				if(Tuning_task_Delay == 0)
 				{
 					Tuning_task(&SYS_Status);
-					Tuning_task_Delay = Tuning_task_Delay;
+					Tuning_task_Delay = SYS_Status.PID_Paras.refresh_Hz;
 				}
-			};break;
+			}break;
 			case FAULT_MODE:
 			{
-				if(NRF24L01_Check())
-					SYS_Status.DTU_NRF_Status &= NRF_OFF;
-				else
-					SYS_Status.DTU_NRF_Status |= NRF_ON;
-				
-				Command_patch(Tx_buf, &SYS_Status, MODE_STATUS);		//打包数据，更新Tx_buf，准备发送
-				do
+				if(Fault_task_Delay == 0)
 				{
-					rx_len = NRF24L01_Tx_ACKwithpayload(Tx_buf, Rx_buf);
-					if((rx_len>0)&&(rx_len<33))
-					{
-						SYS_Status.DTU_NRF_Status |= NRF_CONNECTED;
-						break;
-					}
+					Fault_task(&SYS_Status);
+					Fault_task_Delay = FAULT_TASK_DELAY;
 				}
-				while(1);//只有当NRF24L01在线并且通讯正常时才会跳过次循环
-				SYS_Status.DTU_NRF_Status = (SYS_Status.DTU_NRF_Status & 0xc7)|Rx_buf[1];
-			};
+			}
 		}
-		Tx_Flag = TX_WAIT;//复位心跳标志位，等待下次进入	
+//		Tx_Flag = TX_WAIT;//复位心跳标志位，等待下次进入	
 		
 
 //		if( NRF24L01_RxPacket(Rx_buf) == 0 )

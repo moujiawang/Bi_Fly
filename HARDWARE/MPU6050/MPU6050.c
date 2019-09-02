@@ -12,6 +12,7 @@
 
 #include "MPU6050.h"
 #include "IOI2C.h"
+#include "task.h"
 //#include "LED.h"
 //#include "eeprom.h"
 
@@ -20,14 +21,14 @@ uint8_t buffer[14];
 int16_t  MPU6050_FIFO[6][11];
 int16_t Gx_offset=0,Gy_offset=0,Gz_offset=0;
 
-
+#define PI 3.1415927
 /**************************实现函数********************************************
 *函数原型:		void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,int16_t gz)
 *功　　能:	    将新的ADC数据更新到 FIFO数组，进行滤波处理
 *******************************************************************************/
 void  MPU6050_newValues(int16_t ax,int16_t ay,int16_t az,int16_t gx,int16_t gy,int16_t gz)
 {
-unsigned char i ;
+/*unsigned char i ;
 int32_t sum=0;
 for(i=1;i<10;i++){	//FIFO 操作
 MPU6050_FIFO[0][i-1]=MPU6050_FIFO[0][i];
@@ -78,7 +79,34 @@ sum=0;
 for(i=0;i<10;i++){
    sum+=MPU6050_FIFO[5][i];
 }
-MPU6050_FIFO[5][10]=sum/10;
+MPU6050_FIFO[5][10]=sum/10;*/
+
+
+
+MPU6050_FIFO[0][9] = MPU6050_FIFO[0][10];
+MPU6050_FIFO[1][9] = MPU6050_FIFO[1][10];
+MPU6050_FIFO[2][9] = MPU6050_FIFO[2][10];
+MPU6050_FIFO[3][9] = MPU6050_FIFO[3][10];
+MPU6050_FIFO[4][9] = MPU6050_FIFO[4][10];
+MPU6050_FIFO[5][9] = MPU6050_FIFO[5][10];
+
+
+MPU6050_FIFO[0][10]=ax;//将新的数据放置到 数据的最后面
+MPU6050_FIFO[1][10]=ay;
+MPU6050_FIFO[2][10]=az;
+MPU6050_FIFO[3][10]=gx;
+MPU6050_FIFO[4][10]=gy;
+MPU6050_FIFO[5][10]=gz;
+//lowpass filter
+MPU6050_FIFO[0][10]=MPU6050_FIFO[0][10] * 0.7153 + MPU6050_FIFO[0][9] * 0.2847;
+MPU6050_FIFO[1][10]=MPU6050_FIFO[1][10] * 0.7153 + MPU6050_FIFO[1][9] * 0.2847;
+MPU6050_FIFO[2][10]=MPU6050_FIFO[2][10] * 0.7153 + MPU6050_FIFO[2][9] * 0.2847;
+MPU6050_FIFO[3][10]=MPU6050_FIFO[3][10] * 0.7153 + MPU6050_FIFO[3][9] * 0.2847;
+MPU6050_FIFO[4][10]=MPU6050_FIFO[4][10] * 0.7153 + MPU6050_FIFO[4][9] * 0.2847;
+MPU6050_FIFO[5][10]=MPU6050_FIFO[5][10] * 0.7153 + MPU6050_FIFO[5][9] * 0.2847;
+
+
+
 }
 
 /**************************实现函数********************************************

@@ -12,12 +12,10 @@
 
 
 
-void motor_init(void);
+void motor_init(MANUAL_STATUS *manual_status);
 void Command_manage(int32_t Command_length[],MANUAL_STATUS* Manual_Status);
-void Manual_command(const MANUAL_STATUS* Manual_Status);
+void Motor_action(const MANUAL_STATUS* Manual_Status);
 void Flight_command(const FLIGHT_STATUS* Flight_Status);
-
-void PID_command(SYS_STATUS *SYS_status);
 
 #endif
 

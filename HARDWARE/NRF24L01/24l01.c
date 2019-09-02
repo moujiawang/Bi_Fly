@@ -57,7 +57,7 @@ void NRF24L01_Init(NRF24L01_MODE RxTx_mode)
 	NRF24L01_Write_Reg(NRF_WRITE_REG+EN_RXADDR,ERX_P0);						//使能通道0的接收地址 
 	NRF24L01_Write_Reg(NRF_WRITE_REG+SETUP_AW,ADR_WIDTH);					//选择TX/RX的地址宽度
 //	NRF24L01_Write_Reg(NRF_WRITE_REG+RX_PW_P0,RX_PLOAD_WIDTH);				//选择所有通道的有效数据宽度
-	NRF24L01_Write_Reg(NRF_WRITE_REG+SETUP_RETR,ARD_500US|ARC_15);			//设置自动重发间隔时间:500us + 86us;最大自动重发次数:15次
+	NRF24L01_Write_Reg(NRF_WRITE_REG+SETUP_RETR,ARD_2000US|ARC_15);			//设置自动重发间隔时间:500us + 86us;最大自动重发次数:15次
 	NRF24L01_Write_Reg(NRF_WRITE_REG+RF_CH,40);	     						//设置RF通信频率
 	NRF24L01_Write_Reg(NRF_WRITE_REG+RF_SETUP,0x26);						//设置TX发射参数,0db增益,250Kbps,低噪声增益开启	
 	
@@ -147,24 +147,26 @@ u8 NRF24L01_Write_Buf(u8 reg, u8 *pBuf, u8 len)
 //启动NRF24L01发送一次数据
 //txbuf:待发送数据首地址
 //返回值:发送完成状况
-u8 NRF24L01_TxPacket(u8 *txbuf)
+u8 NRF24L01_TxPacket(u8 *txbuf, u8 tx_len)
 {
 	u8 sta;
 //	NRF24L01_CE=0;
-  	NRF24L01_Write_Buf(WR_TX_PLOAD,txbuf,TX_PLOAD_WIDTH);	//写数据到TX BUF  32个字节
-	delay_ms(5);										 	//等待发送完成
+  	NRF24L01_Write_Buf(WR_TX_PLOAD,txbuf,tx_len);			//写数据到TX BUF  32个字节
+//	delay_ms(5);										 	//等待发送完成
 // 	NRF24L01_CE=1;											//启动发送	   
 	while(NRF24L01_IRQ!=0);									//等待发送完成
 	sta=NRF24L01_Read_Reg(STATUS);  						//读取状态寄存器的值	   
-	delay_ms(2);
+//	delay_ms(2);
 	NRF24L01_Write_Reg(NRF_WRITE_REG+STATUS,sta); 			//清除TX_DS或MAX_RT中断标志
 	if(sta&MAX_TX)//达到最大重发次数
 	{
-		NRF24L01_Write_Reg(FLUSH_TX,0xff);					//清除TX FIFO寄存器 
+		NRF24L01_FlushTX();									//清除TX FIFO寄存器 
+		NRF24L01_FlushRX();			
 		return MAX_TX; 
 	}
 	if(sta&TX_OK)//发送完成
 	{
+		NRF24L01_FlushTX();									//清除TX FIFO寄存器 
 		return TX_OK;
 	}
 	return 0xff;//其他原因发送失败
@@ -241,34 +243,37 @@ void NRF24L01_SetTRMode(NRF24L01_MODE mode)
 
 void NRF24L01_ACK_W_Packet(u8 *Data,u8 Data_Length)
 {
-//	NRF24L01_FlushTX();													//先清除TX FIFO(接收端)，防止写入FIFO的数据丢失连接造成的FIFO堵塞
-
+	NRF24L01_FlushTX();													//先清除TX FIFO(接收端)，防止写入FIFO的数据丢失连接造成的FIFO堵塞
 	NRF24L01_Write_Buf(W_ACK_PAYLOAD,Data,Data_Length);					//向管道0写入W_ACK_PAYLOAD命令,并读取数据
 }
 
 /*===========================================================================
-* 函数 ：NRF24L01_Tx_ACKwithpayload(u8 *tx_buf, u8 *rx_buf)                                     * 
+* 函数 ：NRF24L01_Tx_ACKwithpayload(u8 *tx_buf, u8 *rx_buf)                                    
 * 输入 ： u8 *tx_buf, u8 *rx_buf，分别对应系统变量中Tx_Buf和Rx_Buf；执行程序后，
 		  Rx_Buf会被更新
 * 返回 ：通讯正常：返回接收到的数据长度；通讯失败：返回0x00;		  				
 * 说明 ：此函数是在ACK with payload 模式 + DPL(动态数据长度)模式下，发送方发送一次
 		数据并且接受应答消息的函数
 ============================================================================*/
-u8 NRF24L01_Tx_ACKwithpayload(u8 *tx_buf, u8 *rx_buf)
+u8 NRF24L01_Tx_ACKwithpayload(u8 *tx_buf, u8 *rx_buf , u8 tx_length)
 {
 	u8 sta_tmp = 0;
 	u8 rx_len = 0;
 	NRF24L01_FlushTX();
-	sta_tmp = NRF24L01_TxPacket(tx_buf);
+	NRF24L01_FlushRX();													//清除RX_FIFIO
+	NRF24L01_Write_Reg(NRF_WRITE_REG+STATUS,RX_OK|TX_OK|MAX_TX);		//清除TX_DS或MAX_RT中断标志
+	sta_tmp = NRF24L01_TxPacket(tx_buf,tx_length);
 	if( sta_tmp == TX_OK )
 	{
 		rx_len = NRF24L01_Read_Reg(R_RX_PL_WID);						//读取接收到的数据长度
 		if((rx_len > 0)&& (rx_len < 33))
 		{
 			NRF24L01_Read_Buf(RD_RX_PLOAD,rx_buf,rx_len);				//读取数据
+			NRF24L01_FlushTX();
 			NRF24L01_FlushRX();											//清除RX_FIFIO
 			return  rx_len;												//NRF通讯正常，返回接受到的数据长度
 		}
 	}
+	NRF24L01_Write_Reg(NRF_WRITE_REG+STATUS,RX_OK|TX_OK|MAX_TX);		//清除TX_DS或MAX_RT中断标志
 	return  0x00;														//NRF通讯不正常，返回0x00
 }

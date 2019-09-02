@@ -2,7 +2,7 @@
 #include "nrf_protocol.h"
 
 
-void IncPID_Init(PID_PARAS *PID_paras) 
+/*void IncPID_Init(PID_PARAS *PID_paras) 
 {	
 	u8 i = 0;
 	for(i = 0; i<3; i++)
@@ -36,11 +36,12 @@ void IncPID_Init(PID_PARAS *PID_paras)
 		PID_paras->PID_YPR_para[i][ANGLE].LimitLow = 0;
 	}
 }
+*/
 
 /**************************************************************/
 //函数名：PID_update 增量式PID计算
 //输  入：PID_PARA , error
-//输  出：PID计算输出
+//输  出：PID计算的增量输出，注意是这次PID计算的增量，如果是增量的和是pid->PIDcal_Out_SUM
 //说  明：此程序是完成单环PID计算值（已经完成了PID值的最小最大化处理）
 /**************************************************************/
 float PID_Update(PID_PARA* pid, const float error)
@@ -53,20 +54,20 @@ float PID_Update(PID_PARA* pid, const float error)
 	pid->Ki_OUT = pid->Ki * pid->Error;
 	pid->Kd_OUT = pid->Kd * (pid->Error + pid->PreError - 2 * pid->LastError);
 
+	pid->Kp_OUT_SUM += pid->Kp_OUT;
+	pid->Ki_OUT_SUM += pid->Ki_OUT; 
+	pid->Kd_OUT_SUM += pid->Kd_OUT;
+	
 	output = pid->Kp_OUT + pid->Ki_OUT + pid->Kd_OUT;
-
+	pid->PIDcal_Out_SUM += output;
+	
 	//更新PID的误差数据
 	pid->PreError = pid->LastError;
 	pid->LastError = pid->Error;
-	if((output < pid->Limit) && (output >= pid->LimitLow))
-		pid->PIDcal_Out = output;
-	else
-		if(output >= pid->Limit)
-			pid->PIDcal_Out = pid->Limit;
-		else 
-			pid->PIDcal_Out = pid->LimitLow;
+
+	pid->PIDcal_Out = output;
 	
-	return pid->PIDcal_Out;
+	return pid->PIDcal_Out_SUM;
 }
 
 

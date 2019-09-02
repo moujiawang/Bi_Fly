@@ -175,13 +175,13 @@ unsigned char I2C_ReadOneByte(unsigned char I2C_Addr,unsigned char addr)
 	
 	IIC_Start();	
 	IIC_Send_Byte(I2C_Addr);	   //发送写命令
-	res++;
+
 	IIC_Wait_Ack();
-	IIC_Send_Byte(addr); res++;  //发送地址
+	IIC_Send_Byte(addr);   //发送地址
 	IIC_Wait_Ack();	  
 	//IIC_Stop();//产生一个停止条件	
 	IIC_Start();
-	IIC_Send_Byte(I2C_Addr+1); res++;          //进入接收模式			   
+	IIC_Send_Byte(I2C_Addr+1);     //进入接收模式			   
 	IIC_Wait_Ack();
 	res=IIC_Read_Byte(0);	   
     IIC_Stop();//产生一个停止条件

@@ -20,41 +20,88 @@
 DTU_NRF_Status 是一个u8变量，其中每一位代表的含义：
 | 位数 | 7 | 6 | 5 |4| 3 | 2 | 1 | 0 |
 |---|---|---|---|---|---|---|---|---|
-||暂留|暂留|MODE_ID3|MODE_ID2|MODE_ID1| DTU是否能正常通讯 | NRF是否通讯正常 | NRF是否在线 |
+||暂留|flash_write_flag|MODE_ID3|MODE_ID2|MODE_ID1| DTU是否能正常通讯 | NRF是否通讯正常 | NRF是否在线 |
 
 
 ## 上行  
+### 开始模式（START_MODE）：
+| 字节数 |23|22|21|20|19|18|17|16|
+|---|---|---|---|---|---|---|---|---|
+|||爬行机构|拍打机构|中舵机|左舵机|右舵机|SYS_Status|系统时间_H2| 
+| 字节数 |15|14|13|12|11|10|9|8|
+||系统时间_H1|系统时间_L2|系统时间_L1|当前横滚角速度_H|当前横滚角速度_L|当前俯仰角速度_H|当前俯仰角速度_L|当前偏航角速度_H|
+| 字节数 |7|6|5|4|3|2|1|0|
+||当前偏航角速度_L|当前横滚角_H|当前横滚角_L|当前俯仰角_H|当前俯仰角_L|当前偏航角_H|当前偏航角_L|0x08|
+||||||||||
 
+### 手动控制模式（MANUAL_MODE）： 
+| 字节数 |23|22|21|20|19|18|17|16|
+|---|---|---|---|---|---|---|---|---|
+|||爬行机构|拍打机构|中舵机|左舵机|右舵机|SYS_Status|系统时间_H2| 
+| 字节数 |15|14|13|12|11|10|9|8|
+||系统时间_H1|系统时间_L2|系统时间_L1|当前翻滚角速度_H|当前翻滚角速度_L|当前俯仰角速度_H|当前俯仰角速度_L|当前偏航角速度_H|
+| 字节数 |7|6|5|4|3|2|1|0|
+||当前偏航角速度_L|当前横滚角_H|当前横滚角_L|当前俯仰角_H|当前俯仰角_L|当前偏航角_H|当前偏航角_L|0x10|
+|||||||||| 
+
+### 实际应用模式（FLIGHT_MODE）：
+| 字节数 |23|22|21|20|19|18|17|16|
+|---|---|---|---|---|---|---|---|---|
+|||爬行机构|拍打机构|中舵机|左舵机|右舵机|SYS_Status|系统时间_H2| 
+| 字节数 |15|14|13|12|11|10|9|8|
+||系统时间_H1|系统时间_L2|系统时间_L1|当前翻滚角速度_H|当前翻滚角速度_L|当前俯仰角速度_H|当前俯仰角速度_L|当前偏航角速度_H|
+| 字节数 |7|6|5|4|3|2|1|0|
+||当前偏航角速度_L|当前横滚角_H|当前横滚角_L|当前俯仰角_H|当前俯仰角_L|当前偏航角_H|当前偏航角_L|0x18|
+|||||||||| 
+### 调参实验模式（TUNING_MODE）：
 | 字节数 |31|30|29|28|27|26|25|24|
 |---|---|---|---|---|---|---|---|---|
-||||SYS_Status|系统时间_H2|系统时间_H1|系统时间_L2|系统时间_L1|当前横滚角_H|
+|||拍打机构|中舵机|左舵机|右舵机|PID_ID|(PID_ID)_Kd_Int_out_H|(PID_ID)_Kd_Int_out_L| 
 | 字节数 |23|22|21|20|19|18|17|16|
-||当前横滚角_L|当前俯仰角_H|当前俯仰角_L|当前偏航角_H|当前偏航角_L|Roll_Kd_Ext|Roll_Ki_Ext|Roll_Kp_Ext|
-|字节数| 15|14|13|12| 11 | 10 | 9 | 8 |
-||Roll_Kd_Int|Roll_Ki_Int|Roll_Kp_Int|Pitch_Kd_Ext|Pitch_Ki_Ext|Pitch_Kp_Ext|Pitch_Kd_Int|Pitch_Ki_Int|
-|字节数| 7 | 6 | 5 |4| 3 | 2 | 1 | 0 |
-||Pitch_Kp_Int|Yaw_Kd_Ext|Yaw_Ki_Ext|Yaw_Kp_Ext|Yaw_Kd_Int|Yaw_Ki_Int|Yaw_Kp_Int|0xAA|
-||||||||||
+||(PID_ID)_Ki_Int_out_H|(PID_ID)_Ki_Int_out_L|(PID_ID)_Kp_Int_out_H|(PID_ID)_Kp_Int_out_L|(PID_ID)_Kd_Ext_out_H|(PID_ID)_Kd_Ext_out_L|(PID_ID)_Ki_Ext_out_H|(PID_ID)_Ki_Ext_out_L| 
+| 字节数 |15|14|13|12|11|10|9|8|
+||(PID_ID)_Kp_Ext_out_H|(PID_ID)_Kp_Ext_out_L|Setpoint_Int_H|Setpoint_Int_L|Error_Ext_H|Error_Ext_L|SYS_Status|系统时间_H2|
+| 字节数 |7|6|5|4|3|2|1|0|
+||系统时间_H1|系统时间_L2|系统时间_L1|(PID_ID)_rate_H|(PID_ID)_rate_L|(PID_ID)_angle_H|(PID_ID)_angle_L|0x38|
+|||||||||| 
+#### 上行数据放大说明：
+角度上传值 = 角度真实值 * 100；  
+角速度上传值 = 角速度真实值；  
+角度误差上传值 = 角度误差真实值 * 100；  
+角速度误差上传值  = 角速度误差真实值 * 10；  
+PID计算值的上传值 = PID计算值的真实值 * 100；
+
+
+### 故障模式（FAULT_MODE）：
+| 字节数 |23|22|21|20|19|18|17|16|  
+|---|---|---|---|---|---|---|---|---|
+|||||中舵机|左舵机|右舵机|SYS_Status|系统时间_H2| 
+| 字节数 |15|14|13|12|11|10|9|8|
+||系统时间_H1|系统时间_L2|系统时间_L1|当前翻滚角速度_H|当前翻滚角速度_L|当前俯仰角速度_H|当前俯仰角速度_L|当前偏航角速度_H|
+| 字节数 |7|6|5|4|3|2|1|0|
+||当前偏航角速度_L|当前横滚角_H|当前横滚角_L|当前俯仰角_H|当前俯仰角_L|当前偏航角_H|当前偏航角_L|0x00 |
+|||||||||| 
 
 ## 下行
 ### 开始模式（START_MODE）：  
 报文ID: 0x08 
-| 字节数 | 1 | 0 |
-|---|---|---|
-|  |要转换的模式|0x08|
+| 字节数 | 4 | 3 | 2 | 1 | 0 |
+|---|---|---|---|---|---| 
+|  |拍打电机|中舵机|左舵机|右舵机|0x08|
 
-如果需要传入初始化的一些值，需要在最后一个字节（Tx_buf[31],对于下位机是Rx_buf[31]）写入HANDSHAKE_MAKR(0xff)
-### 手动控制模式（MANUAL_MODE）
+开始模式下下发的数据为初始时各舵机的位置；  
+  
+### 手动控制模式（MANUAL_MODE）：
 
 报文ID: 0x10
 
 |字节数| 7 | 6 | 5 |4| 3 | 2 | 1 | 0 |
 |---|---|---|---|---|---|---|---|---|
-||||拍打电机转速|爬行电机转速|俯仰舵机|横滚舵机|偏航舵机|0x10|
+||||爬行电机|拍打电机|中舵机|左舵机|右舵机|0x10|
 ||||||||||
 
 
-### 实际应用模式（FLIGHT_MODE）
+### 实际应用模式（FLIGHT_MODE）：
 报文ID: 0x18
 
 |字节数| 7 | 6 | 5 |4| 3 | 2 | 1 | 0 |
@@ -65,37 +112,34 @@ DTU_NRF_Status 是一个u8变量，其中每一位代表的含义：
 ### 调参实验模式（TUNING_MODE）
 报文ID: 0x38
 
+
 | 字节数 |31|30|29|28|27|26|25|24|
 |---|---|---|---|---|---|---|---|---|
-|||||||||Roll_SetValue_H|
+||||||||||
 | 字节数 |23|22|21|20|19|18|17|16|
-||Roll_SetValue_L|Pitch_SetValue_H|Pitch_SetValue_L|Yaw_SetValue_H|Yaw_SetValue_L|Roll_Kd_Ext|Roll_Ki_Ext|Roll_Kp_Ext|
+||拍打电机|(PID_ID)_SetValue_H|(PID_ID)_SetValue_L|(PID_ID)_Limit_Int|(PID_ID)_Limitlow_Int|(PID_ID)_Limit_Ext_H|(PID_ID)_Limit_Ext_L|(PID_ID)_Limitlow_Ext_H|
 |字节数| 15|14|13|12| 11 | 10 | 9 | 8 |
-||Roll_Kd_Int|Roll_Ki_Int|Roll_Kp_Int|Pitch_Kd_Ext|Pitch_Ki_Ext|Pitch_Kp_Ext|Pitch_Kd_Int|Pitch_Ki_Int|
+||(PID_ID)_Limitlow_Ext_L|PID_ID|refresh frequency|(PID_ID)_Kd_Ext_H|(PID_ID)_Kd_Ext_L|(PID_ID)_Ki_Ext_H|(PID_ID)_Ki_Ext_L|(PID_ID)_Kp_Ext_H|
 |字节数| 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
-||Pitch_Kp_Int|Yaw_Kd_Ext|Yaw_Ki_Ext|Yaw_Kp_Ext|Yaw_Kd_Int|Yaw_Ki_Int|Yaw_Kp_Int|0x38|
+||(PID_ID)_Kp_Ext_L|(PID_ID)_Kd_Int_H|(PID_ID)_Kd_Int_L|(PID_ID)_Ki_Int_H|(PID_ID)_Ki_Int_L|(PID_ID)_Kp_Int_H|(PID_ID)_Kp_Int_L|0x38|
+||||||||||
+
+### 故障模式（TUNING_MODE）
+报文ID: 0x00
+|字节数| 7 | 6 | 5 |4| 3 | 2 | 1 | 0 |
+|---|---|---|---|---|---|---|---|---|
+|||||||||0x00|
 ||||||||||
 
 
+调参实验也分成两种模式：  
+一：单轴模式；  
+YAW , PITCH, ROLL分别单独调整；  
+二： 整机模式；  
+YAW , PITCH, ROLL的PID同时上，模拟真实的场景；当PID_ID为ALL(0x04)时，表示整机模式；
 
+ 
 
-## 上行
-### 基础控制类型
-报文ID: 0xB0
-控制量 | 数据类型
----|---
-拍打电机转速|uint8_t
-爬行电机转速|uint8_t
-俯仰舵机|uint8_t
-横滚舵机|uint8_t
-偏航舵机|uint8_t
-偏航角速度|uint16_t
-俯仰角速度|uint16_t
-横滚角速度|uint16_t
-偏航角|uint16_t
-俯仰角|uint16_t
-横滚角|uint16_t
-系统时间|uint32_t
 
 
 

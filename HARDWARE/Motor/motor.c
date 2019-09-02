@@ -6,9 +6,10 @@
 #include "IncPID.h"
 #include "motor.h"
 #include "attitude_pid.h"
+#include "Data_map.h"
 
 
-void motor_init(void)
+void motor_init(MANUAL_STATUS *manual_status)
 {
 	GPIO_InitTypeDef GPIO_def;
 	TIM_TimeBaseInitTypeDef TIM_TimeBaseInitStruct;
@@ -51,7 +52,7 @@ void motor_init(void)
 	TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
 	TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Disable;
 	TIM_OC4Init(TIM3, &TIM_OCInitStruct);
-	//拍打机构电机控制--使能，占空比设置
+	//拍打机构电机控制--不使能，占空比设置
 	TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
 	TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Disable;
 //	TIM_OCInitStruct.TIM_Pulse = 0;
@@ -64,12 +65,12 @@ void motor_init(void)
 	//TIM2时钟配置
 	TIM_TimeBaseInitStruct.TIM_Prescaler = (720-1);					//72MHZ/720等于定时器计数器1秒钟计数的次数，也就是100000次，那每计数一次时间为0.01ms
 	TIM_TimeBaseInitStruct.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseInitStruct.TIM_Period = 2000-1;						//计数2000次，也就是20ms
+	TIM_TimeBaseInitStruct.TIM_Period = 350-1;						//计数500次，也就是5ms
 	TIM_TimeBaseInitStruct.TIM_ClockDivision = 0;
 			
 	TIM_TimeBaseInit(TIM2, &TIM_TimeBaseInitStruct);
 	
-	//Pitch舵机控制——引脚配置和时钟配置
+	//left舵机控制——引脚配置和时钟配置
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);			//打开PA引脚的时钟
 		
 	GPIO_def.GPIO_Pin = GPIO_Pin_1;
@@ -81,11 +82,11 @@ void motor_init(void)
 	
 	TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
 	TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Enable;
-	TIM_OCInitStruct.TIM_Pulse = 150;
+	TIM_OCInitStruct.TIM_Pulse = manual_status->LeftServo_Pulse;
 	TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
 
 	TIM_OC2Init(TIM2, &TIM_OCInitStruct);
-	//Roll舵机控制——引脚配置和时钟配置		
+	//mid舵机控制——引脚配置和时钟配置		
 	GPIO_def.GPIO_Pin = GPIO_Pin_2;
 	GPIO_def.GPIO_Mode = GPIO_Mode_AF_PP;							//推免输出
 	GPIO_def.GPIO_Speed = GPIO_Speed_50MHz;
@@ -97,11 +98,11 @@ void motor_init(void)
 	
 	TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
 	TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Enable;
-	TIM_OCInitStruct.TIM_Pulse = 150;
+	TIM_OCInitStruct.TIM_Pulse = manual_status->MidServo_Pulse;
 	TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
 
 	TIM_OC3Init(TIM2, &TIM_OCInitStruct);
-	//Yaw舵机控制——引脚配置和时钟配置		
+	//right舵机控制——引脚配置和时钟配置		
 	GPIO_def.GPIO_Pin = GPIO_Pin_3;
 	GPIO_def.GPIO_Mode = GPIO_Mode_AF_PP;							//推免输出
 	GPIO_def.GPIO_Speed = GPIO_Speed_50MHz;
@@ -111,7 +112,7 @@ void motor_init(void)
 
 	TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
 	TIM_OCInitStruct.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OCInitStruct.TIM_Pulse = 150;
+	TIM_OCInitStruct.TIM_Pulse = manual_status->RightServo_Pulse;
 	TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
 
 	TIM_OC4Init(TIM2, &TIM_OCInitStruct);	
@@ -174,7 +175,7 @@ void Command_manage(int32_t Command_length[],MANUAL_STATUS* Manual_Status)
 				TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Enable;
 				Manual_Status->Fly_Pulse = Motion_Pulse;
-				TIM_OCInitStruct.TIM_Pulse = Manual_Status->Fly_Pulse;
+				TIM_OCInitStruct.TIM_Pulse = Control_Pulse;
 				TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
 
 				TIM_OC3Init(TIM3, &TIM_OCInitStruct);
@@ -193,7 +194,7 @@ void Command_manage(int32_t Command_length[],MANUAL_STATUS* Manual_Status)
 				TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
 				TIM_OCInitStruct.TIM_OutputState =  TIM_OutputState_Enable;
 				Manual_Status->Climb_Pulse = Motion_Pulse; 
-				TIM_OCInitStruct.TIM_Pulse = Manual_Status->Climb_Pulse;
+				TIM_OCInitStruct.TIM_Pulse = Control_Pulse;
 				TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
 
 				TIM_OC4Init(TIM3, &TIM_OCInitStruct);
@@ -242,7 +243,8 @@ void Command_manage(int32_t Command_length[],MANUAL_STATUS* Manual_Status)
 */
 }
 
-void Manual_command(const MANUAL_STATUS* Manual_status)
+
+void Motor_action(const MANUAL_STATUS* Manual_status)
 {
 	TIM_OCInitTypeDef TIM_OCInitStruct;
 	
@@ -274,7 +276,7 @@ void Manual_command(const MANUAL_STATUS* Manual_status)
 			TIM_OCInitStruct.TIM_Pulse = 100;
 		TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
 		TIM_OCInitStruct.TIM_OutputState = TIM_OutputState_Enable;
-		TIM_OC3Init(TIM3, &TIM_OCInitStruct);
+		TIM_OC4Init(TIM3, &TIM_OCInitStruct);
 	}
 	else
 	{
@@ -282,11 +284,11 @@ void Manual_command(const MANUAL_STATUS* Manual_status)
 		TIM_OCInitStruct.TIM_Pulse = 0;
 		TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
 		TIM_OCInitStruct.TIM_OutputState = TIM_OutputState_Disable;
-		TIM_OC3Init(TIM3, &TIM_OCInitStruct);
+		TIM_OC4Init(TIM3, &TIM_OCInitStruct);
 	}
-	TIM_SetCompare2(TIM2,Manual_status->RightServo_Pulse);						//刷新翻滚控制舵机占空比
-	TIM_SetCompare3(TIM2,Manual_status->LeftServo_Pulse);						//刷新俯仰控制舵机占空比
-	TIM_SetCompare4(TIM2,Manual_status->MidServo_Pulse);							//刷新偏航控制舵机占空比
+	TIM_SetCompare2(TIM2,Manual_status->LeftServo_Pulse);						//刷新left舵机占空比
+	TIM_SetCompare3(TIM2,Manual_status->MidServo_Pulse);						//刷新mid舵机占空比
+	TIM_SetCompare4(TIM2,Manual_status->RightServo_Pulse);						//刷新right舵机占空比
 }
 
 void Flight_command(const FLIGHT_STATUS* Flight_Status)
@@ -295,44 +297,10 @@ void Flight_command(const FLIGHT_STATUS* Flight_Status)
 }
 
 
-void PID_command(SYS_STATUS *SYS_status)
-{
-	YPR_ID pid_id;
-	pid_id = SYS_status->PID_Paras.PID_id;
-	attitudeAnglePID(&SYS_status->PID_Paras,&SYS_status->imu_fusion_module);	/* 角度环PID */	
-	attitudeRatePID(&SYS_status->PID_Paras,&SYS_status->imu_fusion_module);		/* 角速度环PID */
-	
-	switch(pid_id)
-	{
-		case YAW:
-			SYS_status->Manual_Status.MidServo_Pulse += SYS_status->PID_Paras.PID_YPR_para[YAW][RATE].PIDcal_Out;
-			;break;
-		case PITCH:
-			{
-				SYS_status->Manual_Status.LeftServo_Pulse += SYS_status->PID_Paras.PID_YPR_para[PITCH][RATE].PIDcal_Out;
-				SYS_status->Manual_Status.RightServo_Pulse -= SYS_status->PID_Paras.PID_YPR_para[PITCH][RATE].PIDcal_Out;
-			}break;
-		case ROLL:
-			{
-				SYS_status->Manual_Status.LeftServo_Pulse += SYS_status->PID_Paras.PID_YPR_para[ROLL][RATE].PIDcal_Out;
-				SYS_status->Manual_Status.RightServo_Pulse += SYS_status->PID_Paras.PID_YPR_para[ROLL][RATE].PIDcal_Out;
-			}break;
-		case ALL:
-			{
-				SYS_status->Manual_Status.MidServo_Pulse += SYS_status->PID_Paras.PID_YPR_para[YAW.][RATE].PIDcal_Out;
-				SYS_status->Manual_Status.LeftServo_Pulse += SYS_status->PID_Paras.PID_YPR_para[PITCH][RATE].PIDcal_Out 
-															+ SYS_status->PID_Paras.PID_YPR_para[ROLL][RATE].PIDcal_Out;
-				SYS_status->Manual_Status.RightServo_Pulse += SYS_status->PID_Paras.PID_YPR_para[ROLL][RATE].PIDcal_Out 
-															- SYS_status->PID_Paras.PID_YPR_para[PITCH][RATE].PIDcal_Out;
-			}break;
-	}
-	//执行机构赋值
-	
-	SYS_status->Manual_Status.Fly_Pulse = 100;
-	SYS_status->Manual_Status.Climb_Pulse = 0;
-	Manual_command(&SYS_status->Manual_Status );
-}
-  
 
-	
-	
+
+void Motor_Reset(MANUAL_STATUS* manual_status)
+{
+
+			
+}

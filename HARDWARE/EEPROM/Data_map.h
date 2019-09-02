@@ -2,6 +2,7 @@
 #define __DATAMAP_H
 
 #define  PAGE_Config    (0x08000000 + 62 * 1024) //将配置信息存放在第62页Flash
+#include <stdint.h>
 
 
 struct data_map{
@@ -50,6 +51,21 @@ struct data_map{
 	float Kd_PITCH_ANGLE;
 	float Limit_PITCH_ANGLE;       		//output limit MAX
 	float LimitLow_PITCH_ANGLE;    		//output limit MIN
+//舵机初始位置	
+	uint16_t RightServo_Initpulse;				
+	uint16_t LeftServo_Initpulse;
+	uint16_t MidServo_Initpulse;
+	
+//舵机限制
+	uint16_t RightServo_Limit;
+	uint16_t RightServo_LimitLow;
+	uint16_t LeftServo_Limit;
+	uint16_t LeftServo_LimitLow;	
+	uint16_t MidServo_Limit;
+	uint16_t MidServo_LimitLow;
+//PID刷新频率
+	uint16_t rehresh_Hz;
+
 	
 };
 

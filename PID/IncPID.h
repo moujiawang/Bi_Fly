@@ -7,7 +7,7 @@
 
 
 
-void IncPID_Init(PID_PARAS *PID_paras);
+//void IncPID_Init(PID_PARAS *PID_paras);
 float PID_Update(PID_PARA* pid, const float error);
 uint16_t IncPID_Cal(PID_PARA *PID_para, IMUFusion *Attitude,YPR_ID YPR_id);
 
