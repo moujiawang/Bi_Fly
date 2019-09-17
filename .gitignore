@@ -67,6 +67,7 @@ dkms.conf
 *.uvgui.*
 *.uvguix.*
 *.uvproj.*
+*.uvprojx
 *.uvoptx
 *.dep
 *.bak
