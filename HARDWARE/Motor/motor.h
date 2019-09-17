@@ -14,7 +14,7 @@
 
 void motor_init(MANUAL_STATUS *manual_status);
 void Command_manage(int32_t Command_length[],MANUAL_STATUS* Manual_Status);
-void Motor_action(const MANUAL_STATUS* Manual_Status);
+void Motor_action(const MANUAL_STATUS* Manual_status, const int16_t task_delay_num);
 void Flight_command(const FLIGHT_STATUS* Flight_Status);
 
 #endif

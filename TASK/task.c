@@ -29,7 +29,7 @@ void Start_task(SYS_STATUS *SYS_status)
 		//刷新状态标志
 		SYS_status->DTU_NRF_Status |= NRF_CONNECTED;
 		Command_dispatch(Rx_buf,SYS_status,rx_len);				//解包，分发数据
-		Motor_action(&SYS_status->Manual_Status);			//执行舵机指令操作，实现调整舵机初始位置的功能
+		Motor_action(&SYS_status->Manual_Status,START_TASK_DELAY);			//执行舵机指令操作，实现调整舵机初始位置的功能
 		if(SYS_status->DTU_NRF_Status & WRITE_FLASH_FLAG)	//查看是否需要将数据写入flash
 		{
 			Config.LeftServo_Initpulse = SYS_status->Manual_Status.LeftServo_Pulse;
@@ -51,7 +51,7 @@ void Start_task(SYS_STATUS *SYS_status)
 			NRF24L01_Write_Reg(NRF_WRITE_REG+STATUS,RX_OK|TX_OK|MAX_TX);		//清除TX_DS或MAX_RT中断标志
 			SYS_status->DTU_NRF_Status = (SYS_status->DTU_NRF_Status & 0xc7) | FAULT_MODE;
 			Sys_status_init(SYS_status);						//初始化状态量SYS_Status
-			Motor_action(&SYS_status->Manual_Status);			//电机，舵机执行初始化操作
+			Motor_action(&SYS_status->Manual_Status,START_TASK_DELAY);			//电机，舵机执行初始化操作
 		}
 	}	
 
@@ -73,7 +73,7 @@ void Manual_task(SYS_STATUS *SYS_status)
 		//刷新状态标志和模式信息
 		SYS_status->DTU_NRF_Status |= NRF_CONNECTED;
 		Command_dispatch(Rx_buf,SYS_status,rx_len);				//解包，分发数据
-		Motor_action(&SYS_status->Manual_Status);			//根据解包后的指令，执行指令动作
+		Motor_action(&SYS_status->Manual_Status,MANUAL_TASK_DELAY);			//根据解包后的指令，执行指令动作
 		if(SYS_status->DTU_NRF_Status & WRITE_FLASH_FLAG)	//查看是否需要将数据写入flash
 		{
 /*			Config.LeftServo_Initpulse = SYS_status->Manual_Status.LeftServo_Pulse;
@@ -95,7 +95,7 @@ void Manual_task(SYS_STATUS *SYS_status)
 			NRF24L01_Write_Reg(NRF_WRITE_REG+STATUS,RX_OK|TX_OK|MAX_TX);		//清除TX_DS或MAX_RT中断标志
 			SYS_status->DTU_NRF_Status = (SYS_status->DTU_NRF_Status & 0xc7) | FAULT_MODE;
 			Sys_status_init(SYS_status);						//初始化状态量SYS_Status
-			Motor_action(&SYS_status->Manual_Status);			//电机，舵机执行初始化操作
+			Motor_action(&SYS_status->Manual_Status, MANUAL_TASK_DELAY);			//电机，舵机执行初始化操作
 		}
 	}	
 
@@ -138,7 +138,7 @@ void Flight_task(SYS_STATUS *SYS_status)
 			NRF24L01_Write_Reg(NRF_WRITE_REG+STATUS,RX_OK|TX_OK|MAX_TX);		//清除TX_DS或MAX_RT中断标志
 			SYS_status->DTU_NRF_Status = (SYS_status->DTU_NRF_Status & 0xc7) | FAULT_MODE;
 			Sys_status_init(SYS_status);						//初始化状态量SYS_Status
-			Motor_action(&SYS_status->Manual_Status);			//电机，舵机执行初始化操作
+			Motor_action(&SYS_status->Manual_Status,FLIGHT_TASK_DELAY);			//电机，舵机执行初始化操作
 		}
 	}	
 
@@ -160,7 +160,7 @@ void Tuning_task(SYS_STATUS *SYS_status)
 		SYS_status->DTU_NRF_Status |= NRF_CONNECTED;
 		Command_dispatch(Rx_buf,SYS_status,rx_len);			//解包，分发数据
 		PID_command( SYS_status );							//根据解包后的指令，执行PID运算
-		Motor_action(&SYS_status->Manual_Status );		//执行电机操作
+		Motor_action(&SYS_status->Manual_Status, SYS_status->PID_Paras.refresh_Hz);		//执行电机操作
 		if(SYS_status->DTU_NRF_Status & WRITE_FLASH_FLAG)	//查看是否需要将数据写入flash
 		{
 			switch(SYS_status->PID_Paras.PID_id)
@@ -273,7 +273,7 @@ void Tuning_task(SYS_STATUS *SYS_status)
 			NRF24L01_Write_Reg(NRF_WRITE_REG+STATUS,RX_OK|TX_OK|MAX_TX);		//清除TX_DS或MAX_RT中断标志
 			SYS_status->DTU_NRF_Status = (SYS_status->DTU_NRF_Status & 0xc7) | FAULT_MODE;
 			Sys_status_init(SYS_status);						//初始化状态量SYS_Status
-			Motor_action(&SYS_status->Manual_Status);			//电机，舵机执行初始化操作
+			Motor_action(&SYS_status->Manual_Status, SYS_status->PID_Paras.refresh_Hz);			//电机，舵机执行初始化操作
 		}
 	}
 }

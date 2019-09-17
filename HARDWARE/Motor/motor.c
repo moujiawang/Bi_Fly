@@ -9,6 +9,7 @@
 #include "Data_map.h"
 
 
+
 void motor_init(MANUAL_STATUS *manual_status)
 {
 	GPIO_InitTypeDef GPIO_def;
@@ -243,16 +244,133 @@ void Command_manage(int32_t Command_length[],MANUAL_STATUS* Manual_Status)
 */
 }
 
-
-void Motor_action(const MANUAL_STATUS* Manual_status)
+void Motor_action(const MANUAL_STATUS* Manual_status, const int16_t task_delay_num)
 {
 	TIM_OCInitTypeDef TIM_OCInitStruct;
+	static u8 count_num = 0;
+	uint8_t Fly_current_pulse = TIM3->CCR3;		//读取当前的占空比的值
+	uint8_t Climb_current_pulse = TIM3->CCR4;	//读取当前的占空比的值
+	if( Fly_current_pulse != Manual_status->Fly_Pulse )
+	{
+		if(Fly_current_pulse < Manual_status->Fly_Pulse)
+		{
+			if(count_num == 0)
+			{
+				if(task_delay_num >= 20)
+					count_num = task_delay_num / 20;
+				else
+				{
+					count_num = 20 / task_delay_num;	
+					Fly_current_pulse ++;
+				}
+			}
+			else
+			{
+				if(task_delay_num >= 20)
+				{
+					if((Manual_status->Fly_Pulse - Fly_current_pulse) > count_num)
+						Fly_current_pulse += count_num;
+					else 
+						Fly_current_pulse = Manual_status->Fly_Pulse;
+				}
+				else
+				{
+					if((Manual_status->Fly_Pulse - Fly_current_pulse) > 0)
+						count_num--;
+				}
+			}
+		}
+		else
+			Fly_current_pulse = Manual_status->Fly_Pulse; 
+	}
 	
+	if( Climb_current_pulse != Manual_status->Climb_Pulse)
+	{
+		if(Climb_current_pulse < Manual_status->Climb_Pulse)
+		{
+			if(count_num == 0)
+			{
+				if(task_delay_num >= 20)
+					count_num = task_delay_num / 20;
+				else
+				{
+					count_num = 20 / task_delay_num;	
+					Climb_current_pulse ++;
+				}
+			}
+			else
+			{
+				if(task_delay_num >= 20)
+				{
+					if((Manual_status->Fly_Pulse - Climb_current_pulse) > count_num)
+						Climb_current_pulse += count_num;
+					else 
+						Climb_current_pulse = Manual_status->Climb_Pulse;
+				}
+				else
+				{
+					if((Manual_status->Climb_Pulse - Climb_current_pulse) > 0)
+						count_num--;
+				}
+			}
+		}
+		else
+			Fly_current_pulse = Manual_status->Climb_Pulse; 
+	}
+
+	if( Fly_current_pulse > 3 )								 		//拍打电机Enable，并设置占空比
+	{
+		TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
+		if( Manual_status->Fly_Pulse <= 100 )
+			TIM_OCInitStruct.TIM_Pulse = Fly_current_pulse;		
+		else
+			TIM_OCInitStruct.TIM_Pulse = 100;
+		TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
+		TIM_OCInitStruct.TIM_OutputState = TIM_OutputState_Enable;
+		TIM_OC3Init(TIM3, &TIM_OCInitStruct);
+	}
+	else
+	{
+		TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
+		TIM_OCInitStruct.TIM_Pulse = 0;
+		TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
+		TIM_OCInitStruct.TIM_OutputState = TIM_OutputState_Disable;
+		TIM_OC3Init(TIM3, &TIM_OCInitStruct);
+	}
+	if( Climb_current_pulse > 3 )									 //爬行电机Enable，并设置占空比
+	{
+		TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
+		if(Manual_status->Climb_Pulse <= 100)
+			TIM_OCInitStruct.TIM_Pulse = Climb_current_pulse;
+		else
+			TIM_OCInitStruct.TIM_Pulse = 100;
+		TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
+		TIM_OCInitStruct.TIM_OutputState = TIM_OutputState_Enable;
+		TIM_OC4Init(TIM3, &TIM_OCInitStruct);
+	}
+	else
+	{
+		TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
+		TIM_OCInitStruct.TIM_Pulse = 0;
+		TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
+		TIM_OCInitStruct.TIM_OutputState = TIM_OutputState_Disable;
+		TIM_OC4Init(TIM3, &TIM_OCInitStruct);
+	}
+	TIM_SetCompare2(TIM2,Manual_status->LeftServo_Pulse);						//刷新left舵机占空比
+	TIM_SetCompare3(TIM2,Manual_status->MidServo_Pulse);						//刷新mid舵机占空比
+	TIM_SetCompare4(TIM2,Manual_status->RightServo_Pulse);						//刷新right舵机占空比
+
+}
+
+/*void Motor_action(const MANUAL_STATUS* Manual_status)
+{
+	TIM_OCInitTypeDef TIM_OCInitStruct;
+
 	if( Manual_status->Fly_Pulse > 3 )								 		//拍打电机Enable，并设置占空比
 	{
 		TIM_OCInitStruct.TIM_OCMode = TIM_OCMode_PWM2;
 		if( Manual_status->Fly_Pulse <= 100 )
-			TIM_OCInitStruct.TIM_Pulse = Manual_status->Fly_Pulse;
+			TIM_OCInitStruct.TIM_Pulse = Manual_status->Fly_Pulse;		
 		else
 			TIM_OCInitStruct.TIM_Pulse = 100;
 		TIM_OCInitStruct.TIM_OCPolarity = TIM_OCPolarity_Low;
@@ -289,7 +407,7 @@ void Motor_action(const MANUAL_STATUS* Manual_status)
 	TIM_SetCompare2(TIM2,Manual_status->LeftServo_Pulse);						//刷新left舵机占空比
 	TIM_SetCompare3(TIM2,Manual_status->MidServo_Pulse);						//刷新mid舵机占空比
 	TIM_SetCompare4(TIM2,Manual_status->RightServo_Pulse);						//刷新right舵机占空比
-}
+}*/
 
 void Flight_command(const FLIGHT_STATUS* Flight_Status)
 {
